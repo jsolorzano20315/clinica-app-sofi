@@ -35,3 +35,4 @@ const pageTitle = ref('Alerts')
     </div>
   </DefaultLayout>
 </template>
+

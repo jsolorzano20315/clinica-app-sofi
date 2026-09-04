@@ -344,3 +344,4 @@ const updatePhoto = () => {
     </div>
   </div>
 </template>
+

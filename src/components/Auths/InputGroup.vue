@@ -18,3 +18,4 @@ const props = defineProps(['label', 'type', 'placeholder'])
     </div>
   </div>
 </template>
+

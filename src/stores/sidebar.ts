@@ -13,3 +13,4 @@ export const useSidebarStore = defineStore('sidebar', () => {
 
   return { isSidebarOpen, toggleSidebar, selected, page }
 })
+

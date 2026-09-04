@@ -22,3 +22,4 @@ const pageTitle = ref('Tables')
     </div>
   </DefaultLayout>
 </template>
+

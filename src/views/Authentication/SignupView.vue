@@ -158,3 +158,4 @@ const pageTitle = ref('Sign Up')
     </DefaultAuthCard>
   </DefaultLayout>
 </template>
+

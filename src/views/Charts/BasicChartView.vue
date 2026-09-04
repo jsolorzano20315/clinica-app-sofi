@@ -31,3 +31,4 @@ const pageTitle = ref('Basic Chart')
     </div>
   </DefaultLayout>
 </template>
+

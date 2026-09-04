@@ -147,3 +147,4 @@ class="col-span-12 rounded-sm border border-stroke bg-white px-5 pt-20 pb-20 sha
   </div>
 </div>
 </template>
+

@@ -27,3 +27,4 @@ import SidebarArea from '@/components/Sidebar/SidebarArea.vue'
   </div>
   <!-- ===== Page Wrapper End ===== -->
 </template>
+

@@ -17,3 +17,4 @@ const pageTitle = ref('Settings Page')
     </div>
   </DefaultLayout>
 </template>
+

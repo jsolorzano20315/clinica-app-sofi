@@ -26,3 +26,4 @@ const switcherToggle = ref<boolean>(false)
     </label>
   </div>
 </template>
+

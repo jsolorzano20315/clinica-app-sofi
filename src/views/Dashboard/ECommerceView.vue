@@ -39,3 +39,4 @@ import DefaultLayout from '@/layouts/DefaultLayout.vue'
     </div>
   </DefaultLayout>
 </template>
+

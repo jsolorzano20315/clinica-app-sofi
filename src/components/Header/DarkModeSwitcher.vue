@@ -50,3 +50,4 @@ const darkModeStore = useDarkModeStore()
     </span>
   </label>
 </template>
+

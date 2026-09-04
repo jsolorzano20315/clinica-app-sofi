@@ -18,3 +18,4 @@ const props = defineProps(['pageTitle'])
     </nav>
   </div>
 </template>
+

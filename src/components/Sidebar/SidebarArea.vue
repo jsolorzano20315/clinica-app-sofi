@@ -316,7 +316,7 @@ const menuGroups = computed(() => {
     <!-- SIDEBAR HEADER -->
     <div class="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5">
       <router-link to="dashboard">
-        <img src="@/assets/images/logo/Logo.svg" alt="Logo" />
+        <img src="@/assets/images/Logo/Logo.svg" alt="Logo" />
       </router-link>
 
       <button class="block lg:hidden" @click="sidebarStore.isSidebarOpen = true">
@@ -363,3 +363,4 @@ const menuGroups = computed(() => {
     </div>
   </aside>
 </template>
+

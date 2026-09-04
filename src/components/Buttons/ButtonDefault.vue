@@ -12,3 +12,4 @@ const props = defineProps(['label', 'route', 'customClasses'])
     {{ props.label }}
   </router-link>
 </template>
+
