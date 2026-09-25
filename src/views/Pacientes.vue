@@ -1,4 +1,3 @@
-
 <script setup lang="ts">
 import BreadcrumbDefault from '@/components/Breadcrumbs/BreadcrumbDefault.vue'
 import DefaultCard from '@/components/Forms/DefaultCard.vue'
@@ -7,9 +6,9 @@ import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 
 /* =========================================================
-   CONFIGURACIÓN GENERAL
+   ⚙️ CONFIGURACIÓN GENERAL
+   Usuario logueado + endpoints de la API
 ========================================================= */
-
 const pestañaActiva = ref<
   | 'paciente'
   | 'antecedentes'
@@ -33,86 +32,65 @@ const pestañaActiva = ref<
   | 'planTerapeutico'
   | 'criteriosAceptacion'
 >('paciente')
-
-const email = localStorage.getItem('email') || ''
-const clinica = localStorage.getItem('clinica') || ''
-const rol = localStorage.getItem('rol') || ''
+const email = localStorage.getItem("email") || ''
+const clinica = localStorage.getItem("clinica") || ''
+const rol = localStorage.getItem("rol") || ''
 
 const API_URL = import.meta.env.VITE_API_URL
 
-const API_URL_ListaPacientes =
-  `${API_URL}/Pacientes/ListaPacientes/${encodeURIComponent(clinica)}`
+const API_URL_ListaPacientes = `${API_URL}/Pacientes/ListaPacientes/${encodeURIComponent(clinica)}`
 
-const API_URL_ExpedienteCompleto =
-  `${API_URL}/ExpedienteClinico/GuardarExpedienteCompleto`
+const API_URL_ExpedienteCompleto = `${API_URL}/ExpedienteClinico/GuardarExpedienteCompleto`
 
-const API_URL_Pacientes_Guardar =
-  `${API_URL}/Pacientes/GuardarPacientes`
+const API_URL_Pacientes_Guardar = `${API_URL}/Pacientes/GuardarPacientes`
 
-const API_URL_AntecedentesPersonales_Guardar =
-  `${API_URL}/AntecedentesPersonales/GuardarAntecedentesPersonales`
+const API_URL_AntecedentesPersonales_Guardar = `${API_URL}/AntecedentesPersonales/GuardarAntecedentesPersonales`
 
-const API_URL_AntecedentesFamiliares_Guardar =
-  `${API_URL}/AntecedentesFamiliares/GuardarAntecedentesFamiliares`
+const API_URL_AntecedentesFamiliares_Guardar = `${API_URL}/AntecedentesFamiliares/GuardarAntecedentesFamiliares`
 
-const API_URL_AntecedentesQuirurgicos_Guardar =
-  `${API_URL}/AntecedentesQuirurgicos/GuardarAntecedentesQuirurgicos`
+const API_URL_AntecedentesQuirurgicos_Guardar = `${API_URL}/AntecedentesQuirurgicos/GuardarAntecedentesQuirurgicos`
 
-const API_URL_GinecoObstetricos_Guardar =
-  `${API_URL}/GinecoObstetricos/GuardarGinecoObstetricos`
 
-const API_URL_Habitos_Guardar =
-  `${API_URL}/Habitos/GuardarHabitos`
+const API_URL_GinecoObstetricos_Guardar = `${API_URL}/GinecoObstetricos/GuardarGinecoObstetricos`
 
-const API_URL_Inmunizacion_Guardar =
-  `${API_URL}/Inmunizacion/GuardarInmunizacion`
 
-const API_URL_ActividadFisica_Guardar =
-  `${API_URL}/ActividadFisica/GuardarActividadFisica`
+const API_URL_Habitos_Guardar = `${API_URL}/Habitos/GuardarHabitos`
 
-const API_URL_Alergias_Guardar =
-  `${API_URL}/Alergias/GuardarAlergias`
+const API_URL_Inmunizacion_Guardar = `${API_URL}/Inmunizacion/GuardarInmunizacion`
 
-const API_URL_Medicacion_Guardar =
-  `${API_URL}/MedicacionActual/GuardarMedicacionActual`
+const API_URL_ActividadFisica_Guardar = `${API_URL}/ActividadFisica/GuardarActividadFisica`
 
-const API_URL_HistoriaEnfermedadActual_Guardar =
-  `${API_URL}/HEA/GuardarHEA`
+const API_URL_Alergias_Guardar = `${API_URL}/Alergias/GuardarAlergias`
 
-const API_URL_ExamenFisico_Guardar =
-  `${API_URL}/ExamenFisico/GuardarExamenFisico`
+const API_URL_Medicacion_Guardar = `${API_URL}/MedicacionActual/GuardarMedicacionActual`
 
-const API_URL_MC_Guardar =
-  `${API_URL}/MC/GuardarMC`
+const API_URL_HistoriaEnfermedadActual_Guardar = `${API_URL}/HEA/GuardarHEA`
 
-const API_URL_ROAS_Guardar =
-  `${API_URL}/ROAS/GuardarROAS`
+const API_URL_ExamenFisico_Guardar = `${API_URL}/ExamenFisico/GuardarExamenFisico`
 
-const API_URL_Laboratorios_Guardar =
-  `${API_URL}/Laboratorios/GuardarLaboratorios`
+const API_URL_MC_Guardar = `${API_URL}/MC/GuardarMC`
 
-const API_URL_ECG_Guardar =
-  `${API_URL}/ECG/GuardarECG`
+const API_URL_ROAS_Guardar = `${API_URL}/ROAS/GuardarROAS`
 
-const API_URL_Imagenes_Guardar =
-  `${API_URL}/Imagenes/GuardarImagenes`
+const API_URL_Laboratorios_Guardar = `${API_URL}/Laboratorios/GuardarLaboratorios`
 
-const API_URL_RiesgoCardiovascular_Guardar =
-  `${API_URL}/RiesgoCardiovascular/GuardarRiesgoCardiovascular`
+const API_URL_ECG_Guardar = `${API_URL}/ECG/GuardarECG`
 
-const API_URL_ImpresionDiagnostica_Guardar =
-  `${API_URL}/ImpresionDiagnostica/GuardarImpresionDiagnostica`
+const API_URL_Imagenes_Guardar = `${API_URL}/Imagenes/GuardarImagenes`
 
-const API_URL_PlanTerapeutico_Guardar =
-  `${API_URL}/PlanTerapeutico/GuardarPlanTerapeutico`
+const API_URL_RiesgoCardiovascular_Guardar = `${API_URL}/RiesgoCardiovascular/GuardarRiesgoCardiovascular`
+
+const API_URL_ImpresionDiagnostica_Guardar = `${API_URL}/ImpresionDiagnostica/GuardarImpresionDiagnostica`
+
+const API_URL_PlanTerapeutico_Guardar = `${API_URL}/PlanTerapeutico/GuardarPlanTerapeutico`
+
 
 const modoEdicion = ref(false)
 const modoEdicionbtnNuevo = ref(true)
 
 /* =========================================================
-   ARCHIVOS / IMÁGENES
+Agrega los estados para archivos
 ========================================================= */
-
 interface ArchivoImagen {
   id?: number
   nombre: string
@@ -125,16 +103,23 @@ interface ArchivoImagen {
 const archivosImagenes = ref<ArchivoImagen[]>([])
 const cargandoImagen = ref(false)
 
+
+/* =========================================================
+Eliminar un archivo antes de guardarlo
+========================================================= */
+const eliminarArchivoImagen = (index: number) => {
+  archivosImagenes.value.splice(index, 1)
+}
+
+/* =========================================================
+    Agrega las funciones para seleccionar y eliminar archivos
+========================================================= */
 const tiposImagenPermitidos = [
   'image/jpeg',
   'image/png',
   'image/webp',
   'application/pdf'
 ]
-
-const eliminarArchivoImagen = (index: number) => {
-  archivosImagenes.value.splice(index, 1)
-}
 
 const seleccionarImagenes = (event: Event) => {
   const input = event.target as HTMLInputElement
@@ -170,9 +155,13 @@ const seleccionarImagenes = (event: Event) => {
     })
   }
 
+  // Permite volver a seleccionar el mismo archivo
   input.value = ''
 }
 
+/* =========================================================
+Formatear tamaño
+========================================================= */
 const formatearTamañoArchivo = (bytes: number) => {
   if (bytes === 0) return '0 Bytes'
 
@@ -182,14 +171,221 @@ const formatearTamañoArchivo = (bytes: number) => {
   return `${(bytes / Math.pow(1024, indice)).toFixed(2)} ${unidades[indice]}`
 }
 
-/* =========================================================
-   MENSAJES
-========================================================= */
 
+/* =========================================================
+Función para subir los archivos
+========================================================= */
+const subirArchivosImagenes = async () => {
+  if (!formData.value.Id) {
+    mostrarAlerta(
+      'Primero debe guardar el paciente antes de adjuntar imágenes.',
+      'warning'
+    )
+    return
+  }
+
+  const archivosPendientes = archivosImagenes.value.filter(
+    archivo => archivo.archivo
+  )
+
+  if (archivosPendientes.length === 0) {
+    mostrarAlerta(
+      'No hay archivos nuevos para subir.',
+      'warning'
+    )
+    return
+  }
+
+  try {
+    cargandoImagen.value = true
+
+    const datos = new FormData()
+
+    datos.append('IdPaciente', String(formData.value.Id))
+    datos.append('Clinica', clinica)
+
+    archivosPendientes.forEach(item => {
+      if (item.archivo) {
+        datos.append('Archivos', item.archivo)
+      }
+    })
+
+    await axios.post(
+      `${API_URL}/Pacientes/SubirImagenes`,
+      datos,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }
+    )
+
+    mostrarAlerta(
+      'Las imágenes se registraron correctamente.',
+      'success'
+    )
+
+    // Quitar únicamente los archivos que ya fueron enviados
+    archivosImagenes.value = archivosImagenes.value.filter(
+      archivo => !archivo.archivo
+    )
+
+  } catch (error) {
+    console.error('Error al subir imágenes:', error)
+
+    mostrarAlerta(
+      'Error al registrar las imágenes.',
+      'error'
+    )
+  } finally {
+    cargandoImagen.value = false
+  }
+}
+
+/* =========================================================
+   Nuevo Paciente
+========================================================= */
+const nuevoPaciente = () => {
+
+  // Activar pestaña principal
+  pestañaActiva.value = 'paciente'
+
+  // Salir del modo edición
+  modoEdicionbtnNuevo.value = true
+
+  // Limpiar formulario
+  formData.value = {
+    Nombre: '',
+    Apellido: '',
+    FechaNacimiento: '',
+    Genero: '',
+    EstadoCivil: '',
+    Telefono: '',
+    Direccion: '',
+
+    AntecedentesPersona: '',
+    AntecedentesFamilia: '',
+    AntecedentesQuirurgico: '',
+
+    Gestaciones: 0,
+    Partos: 0,
+    Cesareas: 0,
+    Abortos: 0,
+    HijosVivos: 0,
+    HijosMuertos: 0,
+
+    DescripcionHabitos: '',
+    EstadoInmunizacion: '',
+    NivelActividadFisica: '',
+  
+    Alergia: '',
+    Medicacion: '',
+    HistoriaEnfermedad: '',
+
+    PresionArterial: '',
+    FrecuenciaCardiaca: null,
+    FrecuenciaRespiratoria: null,
+    SaturacionOxigeno: null,
+    PesoExamenFisico: null,
+    Temperatura: '',
+
+    Peso: null,
+    Estatura: null,
+
+    RevisionAparatosSistemas: '',
+    ResultadosLaboratorio: '',
+    InterpretacionElectrocardiograma: '',
+    EstudiosImagen: '',
+    ResultadoEvaluacion: '',
+    Diagnostica: '',
+    TratamientoIndicado: ''
+  }
+   modoEdicion.value = false
+}
+
+
+
+/* =========================================================
+   🏷️ TÍTULO DE PÁGINA
+========================================================= */
+const pageTitle = ref('Pacientes')
+
+
+// ✅ INTERFACE CORRECTA
+interface Paciente {
+  id: number
+  nombreCompleto: string
+  Nombre: string
+  Apellido: string
+  fechaNacimiento: string
+  genero: string
+  estadoCivil: string
+  fecha: string
+  telefono: string
+  direccion: string
+
+  AntecedentesPersona: string
+  AntecedentesFamilia: string
+  AntecedentesQuirurgico: string
+
+  Gestaciones: string
+  Partos: string
+  Cesareas: string
+  Abortos: string
+  HijosVivos: string
+  HijosMuertos: string
+
+  DescripcionHabitos: string
+  EstadoInmunizacion: string
+  NivelActividadFisica: string
+
+  EstadoAlergia: string
+  Alergia: string
+
+  Medicacion: string
+
+  HistoriaEnfermedad: string
+
+  PresionArterial: string
+  FrecuenciaCardiaca: string
+  FrecuenciaRespiratoria: string
+  SaturacionOxigeno: string
+  PesoExamenFisico: string
+  Temperatura: string
+
+  Peso: string
+  Estatura: string
+  IndiceMasaCorporal: string
+
+  RevisionAparatosSistemas: string
+
+  ResultadosLaboratorio: string
+
+  InterpretacionElectrocardiograma: string
+
+  EstudiosImagen: string
+
+  ResultadoEvaluacion: string
+
+  Diagnostica: string
+
+  TratamientoIndicado: string
+
+}
+
+// ✅ ESTADOS PRIMERO
+const pacientes = ref<Paciente[]>([])
+const currentPage = ref(1)
+const itemsPerPage = 5
+
+// =========================================================
+// 🚨 MENSAJES (MODAL PERSONALIZADO)
+// =========================================================
 const mensaje = ref('')
 const tipoMensaje = ref<'success' | 'error' | 'warning'>('success')
 const mostrarMensaje = ref(false)
 
+// CONFIG VISUAL
 const configTipo = computed(() => {
   switch (tipoMensaje.value) {
     case 'success':
@@ -226,12 +422,11 @@ const configTipo = computed(() => {
   }
 })
 
-const mostrarAlerta = (
-  texto: string,
-  tipo: 'success' | 'error' | 'warning' = 'success'
-) => {
+// FUNCIÓN ALERTA
+const mostrarAlerta = (texto: string, tipo: 'success' | 'error' | 'warning' = 'success') => {
   mensaje.value = texto
   tipoMensaje.value = tipo
+
   mostrarMensaje.value = false
 
   setTimeout(() => {
@@ -239,10 +434,7 @@ const mostrarAlerta = (
   }, 50)
 }
 
-/* =========================================================
-   CONFIRMACIÓN ELIMINAR
-========================================================= */
-
+// MODAL DE CONFIRMACIÓN ELIMINAR
 const mostrarConfirmacion = ref(false)
 const pacienteAEliminar = ref<number | null>(null)
 
@@ -260,112 +452,28 @@ const confirmarEliminar = async () => {
   if (!pacienteAEliminar.value) return
 
   try {
-    await axios.delete(
-      `${API_URL}/Pacientes/EliminarPacientes/${pacienteAEliminar.value}`
-    )
-
+    await axios.delete(`${API_URL}/Pacientes/EliminarPacientes/${pacienteAEliminar.value}`)
     await cargarPacientes()
+
+    //mostrarAlerta("Paciente eliminado correctamente", "success")
 
   } catch (error) {
     console.error(error)
-    mostrarAlerta('Error al eliminar paciente', 'error')
+    mostrarAlerta("Error al eliminar paciente", "error")
   } finally {
     cancelarEliminar()
   }
 }
 
 /* =========================================================
-   INTERFACE PACIENTE
+   📝 FORMULARIO REACTIVO
+   Datos para crear una cita médica
 ========================================================= */
-
-interface Paciente {
-  id: number
-  idPaciente?: number
-
-  nombreCompleto: string
-  nombre: string
-  apellido: string
-
-  fechaNacimiento: string
-  genero: string
-  estadoCivil: string
-  fecha: string
-  telefono: string
-  direccion: string
-
-  antecedentesPersona: string
-  antecedentesFamilia: string
-  antecedentesQuirurgico: string
-
-  gestaciones: string
-  partos: string
-  cesareas: string
-  abortos: string
-  hijosVivos: string
-  hijosMuertos: string
-
-  descripcionHabitos: string
-  estadoInmunizacion: string
-  nivelActividadFisica: string
-
-  estadoAlergia: string
-  alergia: string
-
-  medicacion: string
-  historiaEnfermedad: string
-
-  presionArterial: string
-  frecuenciaCardiaca: string
-  frecuenciaRespiratoria: string
-  saturacionOxigeno: string
-  pesoExamenFisico: string
-  temperatura: string
-
-  peso: string
-  estatura: string
-  indiceMasaCorporal: string
-
-  revisionAparatosSistemas: string
-  resultadosLaboratorio: string
-  interpretacionElectrocardiograma: string
-  estudiosImagen: string
-  resultadoEvaluacion: string
-  diagnostica: string
-  tratamientoIndicado: string
-
-  // Alias opcionales para evitar romper referencias existentes
-  Id?: number
-  IdPaciente?: number
-  Nombre?: string
-  Apellido?: string
-  FechaNacimiento?: string
-  Genero?: string
-  EstadoCivil?: string
-  Telefono?: string
-  Direccion?: string
-}
-
-/* =========================================================
-   ESTADOS
-========================================================= */
-
-const pacientes = ref<Paciente[]>([])
-const currentPage = ref(1)
-const itemsPerPage = 5
-
-const pageTitle = ref('Pacientes')
-
-const view = ref('formulario')
-
-/* =========================================================
-   FORMULARIO PRINCIPAL
-========================================================= */
-
+// ✅ FORM CORRECTO
 const formData = ref({
   Id: 0,
   IdPaciente: 0,
   Clinica: clinica,
-  Fecha: '',
 
   Nombre: '',
   Apellido: '',
@@ -412,7 +520,7 @@ const formData = ref({
   ResultadosLaboratorio: '',
 
   InterpretacionElectrocardiograma: '',
-
+  
   EstudiosImagen: '',
 
   ResultadoEvaluacion: '',
@@ -420,79 +528,12 @@ const formData = ref({
   Diagnostica: '',
 
   TratamientoIndicado: ''
+
 })
 
-/* =========================================================
-   NUEVO PACIENTE
-========================================================= */
 
-const nuevoPaciente = () => {
-  pestañaActiva.value = 'paciente'
-  modoEdicionbtnNuevo.value = true
-  modoEdicion.value = false
 
-  formData.value = {
-    Id: 0,
-    IdPaciente: 0,
-    Clinica: clinica,
-    Fecha: '',
-
-    Nombre: '',
-    Apellido: '',
-    FechaNacimiento: '',
-    Telefono: '',
-    Genero: '',
-    EstadoCivil: '',
-    Direccion: '',
-
-    AntecedentesPersona: '',
-    AntecedentesFamilia: '',
-    AntecedentesQuirurgico: '',
-
-    Gestaciones: '',
-    Partos: '',
-    Cesareas: '',
-    Abortos: '',
-    HijosVivos: '',
-    HijosMuertos: '',
-
-    DescripcionHabitos: '',
-    EstadoInmunizacion: '',
-    NivelActividadFisica: '',
-
-    EstadoAlergia: '',
-    Alergia: '',
-
-    Medicacion: '',
-    HistoriaEnfermedad: '',
-
-    PresionArterial: '',
-    FrecuenciaCardiaca: '',
-    FrecuenciaRespiratoria: '',
-    SaturacionOxigeno: '',
-    PesoExamenFisico: '',
-    Temperatura: '',
-
-    Peso: '',
-    Estatura: '',
-    IndiceMasaCorporal: '',
-
-    RevisionAparatosSistemas: '',
-    ResultadosLaboratorio: '',
-    InterpretacionElectrocardiograma: '',
-    EstudiosImagen: '',
-    ResultadoEvaluacion: '',
-    Diagnostica: '',
-    TratamientoIndicado: ''
-  }
-
-  archivosImagenes.value = []
-}
-
-/* =========================================================
-   EDAD
-========================================================= */
-
+/* Agrega el cálculo automático de edad */
 const edad = computed(() => {
   if (!formData.value.FechaNacimiento) {
     return ''
@@ -501,16 +542,13 @@ const edad = computed(() => {
   const nacimiento = new Date(formData.value.FechaNacimiento)
   const hoy = new Date()
 
-  let edadCalculada =
-    hoy.getFullYear() - nacimiento.getFullYear()
+  let edadCalculada = hoy.getFullYear() - nacimiento.getFullYear()
 
-  const mes =
-    hoy.getMonth() - nacimiento.getMonth()
+  const mes = hoy.getMonth() - nacimiento.getMonth()
 
   if (
     mes < 0 ||
-    (mes === 0 &&
-      hoy.getDate() < nacimiento.getDate())
+    (mes === 0 && hoy.getDate() < nacimiento.getDate())
   ) {
     edadCalculada--
   }
@@ -518,10 +556,7 @@ const edad = computed(() => {
   return edadCalculada >= 0 ? edadCalculada : ''
 })
 
-/* =========================================================
-   IMC
-========================================================= */
-
+//--Crear el cálculo automático del IMC
 const imc = computed(() => {
   const peso = Number(formData.value.Peso)
   const estatura = Number(formData.value.Estatura)
@@ -535,15 +570,10 @@ const imc = computed(() => {
     return null
   }
 
-  const resultado =
-    peso / Math.pow(estatura, 2)
+  const resultado = peso / Math.pow(estatura, 2)
 
   return Number(resultado.toFixed(2))
 })
-
-/* =========================================================
-   OPCIONES
-========================================================= */
 
 const generos = [
   { value: 'M', label: 'Masculino' },
@@ -571,21 +601,10 @@ const nivelesActividadFisica = [
 ]
 
 /* =========================================================
-   PACIENTE FEMENINA
+   🌐 API - CARGA DE DATOS
+   Obtener pacientes, doctores y citas desde backend
 ========================================================= */
-
-const esPacienteFemenina = computed(() => {
-  const genero = String(formData.value.Genero ?? '')
-    .trim()
-    .toUpperCase()
-
-  return genero === 'F' || genero === 'FEMENINO'
-})
-
-/* =========================================================
-   CARGAR PACIENTES
-========================================================= */
-
+// ✅ CARGA DE DATOS (CORRECTA)
 const cargarPacientes = async () => {
   try {
     console.log('======================================')
@@ -594,9 +613,7 @@ const cargarPacientes = async () => {
     console.log('CLINICA:', clinica)
     console.log('ENDPOINT:', API_URL_ListaPacientes)
 
-    const res = await axios.get(
-      API_URL_ListaPacientes
-    )
+    const res = await axios.get(API_URL_ListaPacientes)
 
     console.log('STATUS:', res.status)
     console.log('RESPUESTA API:', res.data)
@@ -605,13 +622,12 @@ const cargarPacientes = async () => {
       ? res.data
       : []
 
+    console.log('TOTAL RECIBIDOS:', data.length)
+
     pacientes.value = data.map((p: any) => ({
       id: p.id ?? p.Id ?? 0,
 
-      idPaciente:
-        p.idPaciente ??
-        p.IdPaciente ??
-        0,
+      idPaciente: p.idPaciente ?? p.IdPaciente ?? 0,
 
       nombreCompleto:
         p.nombreCompleto ??
@@ -738,6 +754,10 @@ const cargarPacientes = async () => {
         p.HistoriaEnfermedad ??
         '',
 
+      // =========================
+      // EXAMEN FÍSICO
+      // =========================
+
       presionArterial:
         p.presionArterial ??
         p.PresionArterial ??
@@ -758,7 +778,7 @@ const cargarPacientes = async () => {
         p.SaturacionOxigeno ??
         '',
 
-      pesoExamenFisico:
+      PesoExamenFisico:
         p.pesoExamenFisico ??
         p.PesoExamenFisico ??
         '',
@@ -768,95 +788,74 @@ const cargarPacientes = async () => {
         p.Temperatura ??
         '',
 
-      peso:
-        p.peso ??
-        p.Peso ??
+        Peso: 
+         p.peso ??
+         p.Peso ??
         '',
 
-      estatura:
-        p.estatura ??
-        p.Estatura ??
+        Estatura: 
+         p.estatura ??
+         p.Estatura ??
         '',
 
-      indiceMasaCorporal:
-        p.indiceMasaCorporal ??
-        p.IndiceMasaCorporal ??
+        IndiceMasaCorporal: 
+         p.indiceMasaCorporal ??
+         p.IndiceMasaCorporal ??
         '',
 
-      revisionAparatosSistemas:
-        p.revisionAparatosSistemas ??
-        p.RevisionAparatosSistemas ??
+        RevisionAparatosSistemas: 
+         p.revisionAparatosSistemas ??
+         p.RevisionAparatosSistemas ??
         '',
 
-      resultadosLaboratorio:
-        p.resultadosLaboratorio ??
-        p.ResultadosLaboratorio ??
+        ResultadosLaboratorio: 
+         p.resultadosLaboratorio ??
+         p.ResultadosLaboratorio ??
         '',
 
-      interpretacionElectrocardiograma:
-        p.interpretacionElectrocardiograma ??
-        p.InterpretacionElectrocardiograma ??
+        InterpretacionElectrocardiograma:
+         p.interpretacionElectrocardiograma ??
+         p.InterpretacionElectrocardiograma ??
         '',
 
-      estudiosImagen:
-        p.estudiosImagen ??
-        p.EstudiosImagen ??
+        EstudiosImagen:
+         p.estudiosImagen ??
+         p.EstudiosImagen ??
         '',
 
-      resultadoEvaluacion:
-        p.resultadoEvaluacion ??
-        p.ResultadoEvaluacion ??
+        ResultadoEvaluacion:
+         p.resultadoEvaluacion ??
+         p.ResultadoEvaluacion ??
         '',
 
-      diagnostica:
-        p.diagnostica ??
-        p.Diagnostica ??
+        Diagnostica:
+         p.diagnostica ??
+         p.Diagnostica ??
         '',
 
-      tratamientoIndicado:
-        p.tratamientoIndicado ??
-        p.TratamientoIndicado ??
-        ''
+        TratamientoIndicado:
+         p.tratamientoIndicado ??
+         p.TratamientoIndicado ??
+        '',
     }))
 
-    console.log(
-      'PACIENTES EN REACTIVO:',
-      pacientes.value
-    )
+    console.log('PACIENTES EN REACTIVO:', pacientes.value)
+    console.log('TOTAL PACIENTES:', pacientes.value.length)
 
-    console.log(
-      'TOTAL PACIENTES:',
-      pacientes.value.length
-    )
-
-    if (
-      currentPage.value >
-      totalPages.value
-    ) {
+    // Reiniciar página si fuera necesario
+    if (currentPage.value > totalPages.value) {
       currentPage.value = 1
     }
 
   } catch (error) {
-    console.error(
-      'ERROR AL CARGAR PACIENTES',
-      error
-    )
+    console.error('======================================')
+    console.error('ERROR AL CARGAR PACIENTES')
+    console.error(error)
 
     if (axios.isAxiosError(error)) {
-      console.error(
-        'STATUS ERROR:',
-        error.response?.status
-      )
-
-      console.error(
-        'DATA ERROR:',
-        error.response?.data
-      )
-
-      console.error(
-        'URL ERROR:',
-        error.config?.url
-      )
+      console.error('STATUS ERROR:', error.response?.status)
+      console.error('DATA ERROR:', error.response?.data)
+      console.error('URL ERROR:', error.config?.url)
     }
 
     pacientes.value = []
@@ -868,145 +867,169 @@ const cargarPacientes = async () => {
   }
 }
 
-/* =========================================================
-   GUARDAR PACIENTE INDIVIDUAL
-   Se mantiene para compatibilidad con el template.
-========================================================= */
 
+//RECUPERAR ID_PACIENTE
 const guardarPaciente = async () => {
   try {
-    const datosPaciente = {
-      Id: formData.value.Id,
-      Nombre: formData.value.Nombre,
-      Apellido: formData.value.Apellido,
-      FechaNacimiento:
-        formData.value.FechaNacimiento,
-      Telefono:
-        formData.value.Telefono,
-      Genero:
-        formData.value.Genero,
-      EstadoCivil:
-        formData.value.EstadoCivil,
-      Direccion:
-        formData.value.Direccion,
-      Clinica:
-        formData.value.Clinica
+    const response = await fetch(
+      `${import.meta.env.VITE_API_URL}/GuardarPacientes`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(paciente.value)
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.mensaje || "Error al guardar paciente");
     }
 
-    const response = await axios.post(
-      API_URL_Pacientes_Guardar,
-      datosPaciente
-    )
-
-    const data = response.data
-
-    const idPaciente =
-      data?.idPaciente ??
-      data?.IdPaciente ??
-      data?.paciente?.id ??
-      data?.paciente?.Id ??
-      data?.id ??
-      data?.Id ??
-      0
-
-    if (
-      !idPaciente ||
-      Number(idPaciente) <= 0
-    ) {
-      throw new Error(
-        data?.mensaje ||
-        'No se recibió un IdPaciente válido.'
-      )
-    }
+    // =========================================
+    // GUARDAR EL ID DEL PACIENTE ACTUAL
+    // =========================================
+    const idPaciente = data.idPaciente;
 
     localStorage.setItem(
-      'idPaciente',
+      "idPaciente",
       String(idPaciente)
-    )
+    );
 
-    formData.value.Id =
-      Number(idPaciente)
+    // También mantenerlo en el paciente
+    paciente.value.Id = idPaciente;
 
-    formData.value.IdPaciente =
-      Number(idPaciente)
-
-    console.log(
-      'Paciente creado:',
-      idPaciente
-    )
-
-    return Number(idPaciente)
+    console.log("Paciente creado:", idPaciente);
 
   } catch (error) {
-    console.error(
-      'Error al guardar paciente:',
-      error
-    )
-
-    throw error
+    console.error(error);
   }
-}
+};
+
+
+ const esPacienteFemenina = computed(() => {
+  const genero = String(formData.value.Genero ?? '')
+    .trim()
+    .toUpperCase()
+
+  return genero === 'F' || genero === 'FEMENINO' 
+})
 
 /* =========================================================
-   PAGINACIÓN
+   🔄 ESTADOS REACTIVOS
+   Datos principales + UI (paginación, filtros, vista)
 ========================================================= */
 
+// ✅ COMPUTED
 const paginated = computed(() => {
-  const start =
-    (currentPage.value - 1) *
-    itemsPerPage
-
-  return pacientes.value.slice(
-    start,
-    start + itemsPerPage
-  )
+  const start = (currentPage.value - 1) * itemsPerPage
+  return pacientes.value.slice(start, start + itemsPerPage)
 })
 
 const totalPages = computed(() =>
-  Math.ceil(
-    pacientes.value.length /
-      itemsPerPage
-  ) || 1
+  Math.ceil(pacientes.value.length / itemsPerPage) || 1
 )
 
+
+//const view = ref<'pacientes' | 'form' | 'formulario'>('pacientes') 
+const view = ref('formulario')
+
+
+// Reset formulario
+formData.value = {
+  Id: 0,
+  Nombre: '',
+  Apellido: '',
+  FechaNacimiento: '',
+  Telefono: '',
+  Genero: '',
+  EstadoCivil: '',
+  Direccion: '',
+
+  AntecedentesPersona: '',
+  AntecedentesFamilia: '',
+  AntecedentesQuirurgico: '',
+
+  Gestaciones: '',
+  Partos: '',
+  Cesareas: '',
+  Abortos: '',
+  HijosVivos: '',
+  HijosMuertos: '',
+
+  DescripcionHabitos: '',
+  EstadoInmunizacion: '',
+  NivelActividadFisica: '',
+
+  EstadoAlergia: '',
+  Alergia: '',
+
+  Medicacion: '',
+
+  HistoriaEnfermedad: '',
+
+  PresionArterial: '',
+  FrecuenciaCardiaca: '',
+  FrecuenciaRespiratoria: '',
+  SaturacionOxigeno: '',
+  PesoExamenFisico: '',
+  Temperatura: '',
+
+  Peso: '',
+  Estatura: '',
+  IndiceMasaCorporal: '',
+
+  RevisionAparatosSistemas: '',
+
+  ResultadosLaboratorio: '',
+
+  InterpretacionElectrocardiograma: '',
+
+  EstudiosImagen: '',
+
+  ResultadoEvaluacion: '',
+
+  Diagnostica: '',
+
+  TratamientoIndicado: ''
+}
+
+pestañaActiva.value = 'paciente'
+
+
 /* =========================================================
-   FORMATO FECHA
+   📊 COMPUTED (DATOS DERIVADOS)
+   Filtros, paginación y transformaciones de datos
 ========================================================= */
-
-const formatearFecha = (
-  fecha: string
-) => {
+// ✅ FORMATO FECHA
+const formatearFecha = (fecha: string) => {
   if (!fecha) return ''
-
   const f = new Date(fecha)
-
-  return `${String(
-    f.getDate()
-  ).padStart(2, '0')}/${String(
-    f.getMonth() + 1
-  ).padStart(2, '0')}/${f.getFullYear()}`
+  return `${String(f.getDate()).padStart(2, '0')}/${String(f.getMonth() + 1).padStart(2, '0')}/${f.getFullYear()}`
 }
 
 const telefonoFormateado = computed({
-  get: () =>
-    formData.value.Telefono,
-
+  get: () => formData.value.Telefono,
   set: (val: string) => {
-    formData.value.Telefono =
-      val.replace(/[^0-9]/g, '')
+    formData.value.Telefono = val.replace(/[^0-9]/g, '')
   }
 })
 
 /* =========================================================
-   RESET FORMULARIO
+   🧩 FUNCIONES PRINCIPALES
+   Selección de paciente, envío de formulario y control UI
 ========================================================= */
 
+// =========================================================
+// 🧹 RESTABLECER FORMULARIO
+// =========================================================
 const resetForm = () => {
   formData.value = {
     Id: 0,
     IdPaciente: 0,
     Clinica: clinica,
-    Fecha: '',
 
     Nombre: '',
     Apellido: '',
@@ -1044,159 +1067,47 @@ const resetForm = () => {
     PesoExamenFisico: '',
     Temperatura: '',
 
+    TratamientoIndicado: '',
+
     Peso: '',
     Estatura: '',
     IndiceMasaCorporal: '',
 
     RevisionAparatosSistemas: '',
-    ResultadosLaboratorio: '',
-    InterpretacionElectrocardiograma: '',
-    EstudiosImagen: '',
-    ResultadoEvaluacion: '',
-    Diagnostica: '',
-    TratamientoIndicado: ''
-  }
 
-  archivosImagenes.value = []
+    ResultadosLaboratorio: '',
+
+    InterpretacionElectrocardiograma: '',
+
+    EstudiosImagen: '',
+
+    ResultadoEvaluacion: '',
+
+    Diagnostica: '',
+
+  }
 
   pestañaActiva.value = 'paciente'
 }
 
-/* =========================================================
-   SUBIR IMÁGENES
-========================================================= */
 
-const subirArchivosImagenes = async () => {
-  if (!formData.value.Id) {
-    mostrarAlerta(
-      'Primero debe guardar el paciente antes de adjuntar imágenes.',
-      'warning'
-    )
-
-    return
-  }
-
-  const archivosPendientes =
-    archivosImagenes.value.filter(
-      archivo => archivo.archivo
-    )
-
-  if (
-    archivosPendientes.length === 0
-  ) {
-    return
-  }
-
-  try {
-    cargandoImagen.value = true
-
-    const datos = new FormData()
-
-    datos.append(
-      'IdPaciente',
-      String(formData.value.Id)
-    )
-
-    datos.append(
-      'Clinica',
-      clinica
-    )
-
-    archivosPendientes.forEach(
-      item => {
-        if (item.archivo) {
-          datos.append(
-            'Archivos',
-            item.archivo
-          )
-        }
-      }
-    )
-
-    await axios.post(
-      `${API_URL}/Pacientes/SubirImagenes`,
-      datos,
-      {
-        headers: {
-          'Content-Type':
-            'multipart/form-data'
-        }
-      }
-    )
-
-    mostrarAlerta(
-      'Las imágenes se registraron correctamente.',
-      'success'
-    )
-
-    archivosImagenes.value =
-      archivosImagenes.value.filter(
-        archivo =>
-          !archivo.archivo
-      )
-
-  } catch (error) {
-    console.error(
-      'Error al subir imágenes:',
-      error
-    )
-
-    mostrarAlerta(
-      'Error al registrar las imágenes.',
-      'error'
-    )
-
-  } finally {
-    cargandoImagen.value = false
-  }
-}
-
-/* =========================================================
-   CONVERSIÓN ENTEROS
-========================================================= */
-
-const convertirEnteroONull = (
-  valor: any
-): number | null => {
-  if (
-    valor === '' ||
-    valor === null ||
-    valor === undefined
-  ) {
-    return null
-  }
-
-  const numero = Number(valor)
-
-  return Number.isNaN(numero)
-    ? null
-    : numero
-}
-
-/* =========================================================
-   GUARDAR EXPEDIENTE COMPLETO
-========================================================= */
-
+// ✅ GUARDAR
 const enviarFormulario = async () => {
   try {
+    // =========================================================
+    // 1. DATOS GENERALES
+    // =========================================================
     formData.value.Clinica = clinica
+    formData.value.IndiceMasaCorporal = imc.value
 
-    formData.value.IndiceMasaCorporal =
-      imc.value !== null
-        ? String(imc.value)
-        : ''
+    // Normalizar género una sola vez
+    const genero = String(formData.value.Genero || '')
+      .trim()
+      .toUpperCase()
 
-    const genero =
-      String(
-        formData.value.Genero || ''
-      )
-        .trim()
-        .toUpperCase()
-
-    /* =====================================================
-       EDICIÓN
-    ===================================================== */
-
+    // =========================================================
+    // 2. MODO EDICIÓN
+    // =========================================================
     if (modoEdicion.value) {
 
       await axios.put(
@@ -1219,14 +1130,10 @@ const enviarFormulario = async () => {
         formData.value
       )
 
-      /*
-       * GINECO-OBSTÉTRICOS:
-       * solamente se ejecuta para F
-       */
-      if (
-        genero === 'F' ||
-        genero === 'FEMENINO'
-      ) {
+      // =======================================================
+      // GINECO-OBSTÉTRICOS SOLO PARA MUJER
+      // =======================================================
+      if (genero === 'F' || genero === 'FEMENINO') {
         await axios.put(
           `${API_URL}/GinecoObstetricos/EditarGinecoObstetricos/${formData.value.IdPaciente}`,
           formData.value
@@ -1309,19 +1216,24 @@ const enviarFormulario = async () => {
       )
 
       mostrarAlerta(
-        'Paciente actualizado correctamente',
-        'success'
+        "Paciente actualizado correctamente",
+        "success"
       )
 
     } else {
 
-      /* ===================================================
-         CREAR EXPEDIENTE COMPLETO
-      =================================================== */
+      // =========================================================
+      // 3. CREAR EXPEDIENTE COMPLETO
+      // =========================================================
 
-      const tieneDatos = (
-        obj: Record<string, any>
-      ) => {
+      const API_URL_ExpedienteCompleto =
+        `${API_URL}/Pacientes/GuardarExpedienteCompleto`
+
+      // ---------------------------------------------------------
+      // Función auxiliar:
+      // Devuelve null cuando una sección no tiene información.
+      // ---------------------------------------------------------
+      const tieneDatos = (obj: Record<string, any>) => {
         return Object.values(obj).some(
           valor =>
             valor !== null &&
@@ -1330,382 +1242,313 @@ const enviarFormulario = async () => {
         )
       }
 
-      /* ===================================================
-         PACIENTE
-      =================================================== */
-
+      // ---------------------------------------------------------
+      // PACIENTE
+      // ---------------------------------------------------------
       const paciente = {
-        Nombre:
-          formData.value.Nombre,
-
-        Apellido:
-          formData.value.Apellido,
-
-        FechaNacimiento:
-          formData.value.FechaNacimiento,
-
-        Telefono:
-          formData.value.Telefono,
-
-        Genero:
-          formData.value.Genero,
-
-        EstadoCivil:
-          formData.value.EstadoCivil,
-
-        Direccion:
-          formData.value.Direccion,
-
-        Clinica:
-          formData.value.Clinica
+        Nombre: formData.value.Nombre,
+        Apellido: formData.value.Apellido,
+        FechaNacimiento: formData.value.FechaNacimiento,
+        Telefono: formData.value.Telefono,
+        Genero: formData.value.Genero,
+        EstadoCivil: formData.value.EstadoCivil,
+        Direccion: formData.value.Direccion,
+        Clinica: formData.value.Clinica
       }
 
-      /* ===================================================
-         ANTECEDENTES PERSONALES
-      =================================================== */
-
+      // ---------------------------------------------------------
+      // ANTECEDENTES PERSONALES
+      // ---------------------------------------------------------
       const antecedentesPersonales = {
-        Clinica:
-          formData.value.Clinica,
-
-        Fecha:
-          formData.value.Fecha,
-
+        Clinica: formData.value.Clinica,
+        Fecha: formData.value.Fecha,
         AntecedentesPersona:
           formData.value.AntecedentesPersona
       }
 
-      /* ===================================================
-         ANTECEDENTES FAMILIARES
-      =================================================== */
-
+      // ---------------------------------------------------------
+      // ANTECEDENTES FAMILIARES
+      // ---------------------------------------------------------
       const antecedentesFamiliares = {
-        Clinica:
-          formData.value.Clinica,
-
-        Fecha:
-          formData.value.Fecha,
-
+        Clinica: formData.value.Clinica,
+        Fecha: formData.value.Fecha,
         AntecedentesFamilia:
           formData.value.AntecedentesFamilia
       }
 
-      /* ===================================================
-         ANTECEDENTES QUIRÚRGICOS
-      =================================================== */
-
+      // ---------------------------------------------------------
+      // ANTECEDENTES QUIRÚRGICOS
+      // ---------------------------------------------------------
       const antecedentesQuirurgicos = {
-        Clinica:
-          formData.value.Clinica,
-
-        Fecha:
-          formData.value.Fecha,
-
+        Clinica: formData.value.Clinica,
+        Fecha: formData.value.Fecha,
         AntecedentesQuirurgico:
           formData.value.AntecedentesQuirurgico
       }
 
-      /* ===================================================
-         GINECO-OBSTÉTRICOS
-         SOLO MUJER
-      =================================================== */
+      // ---------------------------------------------------------
+// GINECO-OBSTÉTRICOS
+// SOLO MUJER
+// ---------------------------------------------------------
+const convertirEnteroONull = (valor: any): number | null => {
+  if (
+    valor === '' ||
+    valor === null ||
+    valor === undefined
+  ) {
+    return null
+  }
 
-      const ginecoObstetricos =
-        genero === 'F' ||
-        genero === 'FEMENINO'
-          ? {
-              Clinica:
-                formData.value.Clinica,
+  const numero = Number(valor)
 
-              Gestaciones:
-                convertirEnteroONull(
-                  formData.value.Gestaciones
-                ),
+  return Number.isNaN(numero) ? null : numero
+}
 
-              Partos:
-                convertirEnteroONull(
-                  formData.value.Partos
-                ),
+const ginecoObstetricos =
+  genero === 'F' || genero === 'FEMENINO'
+    ? {
+        Clinica: formData.value.Clinica,
 
-              Cesareas:
-                convertirEnteroONull(
-                  formData.value.Cesareas
-                ),
+        Gestaciones:
+          convertirEnteroONull(formData.value.Gestaciones),
 
-              Abortos:
-                convertirEnteroONull(
-                  formData.value.Abortos
-                ),
+        Partos:
+          convertirEnteroONull(formData.value.Partos),
 
-              HijosVivos:
-                convertirEnteroONull(
-                  formData.value.HijosVivos
-                ),
+        Cesareas:
+          convertirEnteroONull(formData.value.Cesareas),
 
-              HijosMuertos:
-                convertirEnteroONull(
-                  formData.value.HijosMuertos
-                )
-            }
-          : null
+        Abortos:
+          convertirEnteroONull(formData.value.Abortos),
 
-      /* ===================================================
-         HÁBITOS
-      =================================================== */
+        HijosVivos:
+          convertirEnteroONull(formData.value.HijosVivos),
 
-      const habitos = {
-        Clinica:
-          formData.value.Clinica,
+        HijosMuertos:
+          convertirEnteroONull(formData.value.HijosMuertos)
+      }
+    : null
 
+      // ---------------------------------------------------------
+      // HÁBITOS
+      // ---------------------------------------------------------
+     const habitos = {
+        Clinica: formData.value.Clinica,
         DescripcionHabitos:
           formData.value.DescripcionHabitos
       }
 
-      /* ===================================================
-         INMUNIZACIÓN
-      =================================================== */
-
+      // ---------------------------------------------------------
+      // INMUNIZACIÓN
+      // ---------------------------------------------------------
       const inmunizacion = {
-        Clinica:
-          formData.value.Clinica,
-
+        Clinica: formData.value.Clinica,
         EstadoInmunizacion:
           formData.value.EstadoInmunizacion
       }
 
-      /* ===================================================
-         ACTIVIDAD FÍSICA
-      =================================================== */
-
+      // ---------------------------------------------------------
+      // ACTIVIDAD FÍSICA
+      // ---------------------------------------------------------
       const actividadFisica = {
-        Clinica:
-          formData.value.Clinica,
+          Clinica: formData.value.Clinica,
+          NivelActividadFisica:
+            formData.value.NivelActividadFisica
+        }
 
-        NivelActividadFisica:
-          formData.value.NivelActividadFisica
-      }
-
-      /* ===================================================
-         ALERGIAS
-      =================================================== */
-
+      // ---------------------------------------------------------
+      // ALERGIAS
+      // ---------------------------------------------------------
       const alergias = {
-        Clinica:
-          formData.value.Clinica,
+          Clinica: formData.value.Clinica,
+          EstadoAlergia: formData.value.EstadoAlergia || '',
+          Alergia: formData.value.Alergia || ''
+        }
 
-        EstadoAlergia:
-          formData.value.EstadoAlergia || '',
-
-        Alergia:
-          formData.value.Alergia || ''
-      }
-
-      /* ===================================================
-         MEDICACIÓN
-      =================================================== */
-
+      // ---------------------------------------------------------
+      // MEDICACIÓN ACTUAL
+      // ---------------------------------------------------------
       const medicacionActual = {
-        Clinica:
-          formData.value.Clinica,
+          Clinica: formData.value.Clinica,
 
-        Medicacion:
-          formData.value.Medicacion
-      }
+          Medicacion:
+            formData.value.Medicacion
+        }
 
-      /* ===================================================
-         HISTORIA ENFERMEDAD ACTUAL
-      =================================================== */
-
+      // ---------------------------------------------------------
+      // HISTORIA DE ENFERMEDAD ACTUAL
+      // ---------------------------------------------------------
       const historiaEnfermedadActual = {
-        Clinica:
-          formData.value.Clinica,
+          Clinica: formData.value.Clinica,
 
-        HistoriaEnfermedad:
-          formData.value.HistoriaEnfermedad
-      }
+          HistoriaEnfermedad:
+            formData.value.HistoriaEnfermedad
+        }
 
-      /* ===================================================
-         EXAMEN FÍSICO
-      =================================================== */
+      // ---------------------------------------------------------
+      // EXAMEN FÍSICO
+      // ---------------------------------------------------------
+     const examenFisico = {
+      Clinica: formData.value.Clinica,
+      PresionArterial: formData.value.PresionArterial || null,
+      FrecuenciaCardiaca:
+        formData.value.FrecuenciaCardiaca !== '' &&
+        formData.value.FrecuenciaCardiaca !== null &&
+        formData.value.FrecuenciaCardiaca !== undefined
+          ? Number(formData.value.FrecuenciaCardiaca)
+          : null,
 
-      const examenFisico = {
-        Clinica:
-          formData.value.Clinica,
+      FrecuenciaRespiratoria:
+        formData.value.FrecuenciaRespiratoria !== '' &&
+        formData.value.FrecuenciaRespiratoria !== null &&
+        formData.value.FrecuenciaRespiratoria !== undefined
+          ? Number(formData.value.FrecuenciaRespiratoria)
+          : null,
 
-        PresionArterial:
-          formData.value.PresionArterial || null,
+      SaturacionOxigeno:
+        formData.value.SaturacionOxigeno !== '' &&
+        formData.value.SaturacionOxigeno !== null &&
+        formData.value.SaturacionOxigeno !== undefined
+          ? Number(formData.value.SaturacionOxigeno)
+          : null,
 
-        FrecuenciaCardiaca:
-          convertirEnteroONull(
-            formData.value.FrecuenciaCardiaca
-          ),
+      Peso:
+        formData.value.PesoExamenFisico !== '' &&
+        formData.value.PesoExamenFisico !== null &&
+        formData.value.PesoExamenFisico !== undefined
+          ? Number(formData.value.PesoExamenFisico)
+          : null,
 
-        FrecuenciaRespiratoria:
-          convertirEnteroONull(
-            formData.value.FrecuenciaRespiratoria
-          ),
+      Temperatura:
+        formData.value.Temperatura !== '' &&
+        formData.value.Temperatura !== null &&
+        formData.value.Temperatura !== undefined
+          ? Number(formData.value.Temperatura)
+          : null
+    }
 
-        SaturacionOxigeno:
-          convertirEnteroONull(
-            formData.value.SaturacionOxigeno
-          ),
-
-        Peso:
-          formData.value.PesoExamenFisico !== ''
-            ? Number(
-                formData.value.PesoExamenFisico
-              )
-            : null,
-
-        Temperatura:
-          formData.value.Temperatura !== ''
-            ? Number(
-                formData.value.Temperatura
-              )
-            : null
-      }
-
-      /* ===================================================
-         MC / IMC
-      =================================================== */
-
-      const mc = {
-        Clinica:
-          formData.value.Clinica,
+      // ---------------------------------------------------------
+      // MC
+      // ---------------------------------------------------------
+     const mc = {
+        Clinica: formData.value.Clinica,
 
         Peso:
-          formData.value.Peso !== ''
+          formData.value.Peso !== '' &&
+          formData.value.Peso !== null &&
+          formData.value.Peso !== undefined
             ? Number(formData.value.Peso)
             : null,
 
         Estatura:
-          formData.value.Estatura !== ''
+          formData.value.Estatura !== '' &&
+          formData.value.Estatura !== null &&
+          formData.value.Estatura !== undefined
             ? Number(formData.value.Estatura)
             : null,
 
         IndiceMasaCorporal:
-          imc.value !== null
+          imc.value !== null &&
+          imc.value !== undefined &&
+          imc.value !== ''
             ? Number(imc.value)
             : null
       }
 
-      /* ===================================================
-         ROAS
-      =================================================== */
-
+      // ---------------------------------------------------------
+      // ROAS
+      // ---------------------------------------------------------
       const roas = {
-        Clinica:
-          formData.value.Clinica,
+            Clinica: formData.value.Clinica,
 
-        RevisionAparatosSistemas:
-          formData.value.RevisionAparatosSistemas
-      }
+            RevisionAparatosSistemas:
+              formData.value.RevisionAparatosSistemas
+          }
 
-      /* ===================================================
-         LABORATORIOS
-      =================================================== */
+      // ---------------------------------------------------------
+      // LABORATORIOS
+      // ---------------------------------------------------------
+     const laboratorios = {
+          Clinica: formData.value.Clinica,
 
-      const laboratorios = {
-        Clinica:
-          formData.value.Clinica,
+          ResultadosLaboratorio:
+            formData.value.ResultadosLaboratorio
+        }
 
-        ResultadosLaboratorio:
-          formData.value.ResultadosLaboratorio
-      }
+      // ---------------------------------------------------------
+      // ECG
+      // ---------------------------------------------------------
+     const ecg = {
+          Clinica: formData.value.Clinica,
 
-      /* ===================================================
-         ECG
-      =================================================== */
+          InterpretacionElectrocardiograma:
+            formData.value.InterpretacionElectrocardiograma
+        }
 
-      const ecg = {
-        Clinica:
-          formData.value.Clinica,
-
-        InterpretacionElectrocardiograma:
-          formData.value.InterpretacionElectrocardiograma
-      }
-
-      /* ===================================================
-         IMÁGENES
-      =================================================== */
-
+      // ---------------------------------------------------------
+      // IMÁGENES
+      // ---------------------------------------------------------
       const imagenes = {
-        Clinica:
-          formData.value.Clinica,
+          Clinica: formData.value.Clinica,
 
-        EstudiosImagen:
-          formData.value.EstudiosImagen
-      }
+          EstudiosImagen:
+            formData.value.EstudiosImagen
+        }
 
-      /* ===================================================
-         RIESGO CARDIOVASCULAR
-      =================================================== */
-
+      // ---------------------------------------------------------
+      // RIESGO CARDIOVASCULAR
+      // ---------------------------------------------------------
       const riesgoCardiovascular = {
-        Clinica:
-          formData.value.Clinica,
+            Clinica: formData.value.Clinica,
 
-        ResultadoEvaluacion:
-          formData.value.ResultadoEvaluacion
-      }
+            ResultadoEvaluacion:
+              formData.value.ResultadoEvaluacion
+          }
 
-      /* ===================================================
-         IMPRESIÓN DIAGNÓSTICA
-      =================================================== */
+      // ---------------------------------------------------------
+      // IMPRESIÓN DIAGNÓSTICA
+      // ---------------------------------------------------------
+     const impresionDiagnostica = {
+          Clinica: formData.value.Clinica,
 
-      const impresionDiagnostica = {
-        Clinica:
-          formData.value.Clinica,
+          Diagnostica:
+            formData.value.Diagnostica
+        }
 
-        Diagnostica:
-          formData.value.Diagnostica
-      }
-
-      /* ===================================================
-         PLAN TERAPÉUTICO
-      =================================================== */
-
+      // ---------------------------------------------------------
+      // PLAN TERAPÉUTICO
+      // ---------------------------------------------------------
       const planTerapeutico = {
-        Clinica:
-          formData.value.Clinica,
+          Clinica: formData.value.Clinica,
 
-        TratamientoIndicado:
-          formData.value.TratamientoIndicado
-      }
+          TratamientoIndicado:
+            formData.value.TratamientoIndicado
+        }
 
-      /* ===================================================
-         PAYLOAD
-      =================================================== */
-
+      // =========================================================
+      // 4. CONSTRUIR PAYLOAD
+      // =========================================================
       const payload = {
         Paciente: paciente,
 
         AntecedentesPersonales:
-          tieneDatos(
-            antecedentesPersonales
-          )
+          tieneDatos(antecedentesPersonales)
             ? antecedentesPersonales
             : null,
 
         AntecedentesFamiliares:
-          tieneDatos(
-            antecedentesFamiliares
-          )
+          tieneDatos(antecedentesFamiliares)
             ? antecedentesFamiliares
             : null,
 
         AntecedentesQuirurgicos:
-          tieneDatos(
-            antecedentesQuirurgicos
-          )
+          tieneDatos(antecedentesQuirurgicos)
             ? antecedentesQuirurgicos
             : null,
 
         GinecoObstetricos:
           ginecoObstetricos &&
-          tieneDatos(
-            ginecoObstetricos
-          )
+          tieneDatos(ginecoObstetricos)
             ? ginecoObstetricos
             : null,
 
@@ -1735,9 +1578,7 @@ const enviarFormulario = async () => {
             : null,
 
         HistoriaEnfermedadActual:
-          tieneDatos(
-            historiaEnfermedadActual
-          )
+          tieneDatos(historiaEnfermedadActual)
             ? historiaEnfermedadActual
             : null,
 
@@ -1772,16 +1613,12 @@ const enviarFormulario = async () => {
             : null,
 
         RiesgoCardiovascular:
-          tieneDatos(
-            riesgoCardiovascular
-          )
+          tieneDatos(riesgoCardiovascular)
             ? riesgoCardiovascular
             : null,
 
         ImpresionDiagnostica:
-          tieneDatos(
-            impresionDiagnostica
-          )
+          tieneDatos(impresionDiagnostica)
             ? impresionDiagnostica
             : null,
 
@@ -1792,29 +1629,26 @@ const enviarFormulario = async () => {
       }
 
       console.log(
-        'PAYLOAD EXPEDIENTE COMPLETO:',
+        "PAYLOAD EXPEDIENTE COMPLETO:",
         payload
       )
 
-      /* ===================================================
-         GUARDAR EXPEDIENTE
-      =================================================== */
-
-      const response =
-        await axios.post(
-          API_URL_ExpedienteCompleto,
-          payload
-        )
+      // =========================================================
+      // 5. GUARDAR TODO EL EXPEDIENTE
+      // =========================================================
+      const response = await axios.post(
+        API_URL_ExpedienteCompleto,
+        payload
+      )
 
       console.log(
-        'RESPUESTA EXPEDIENTE:',
+        "RESPUESTA EXPEDIENTE:",
         response.data
       )
 
-      /* ===================================================
-         RECUPERAR ID PACIENTE
-      =================================================== */
-
+      // =========================================================
+      // 6. RECUPERAR IdPaciente
+      // =========================================================
       const idPaciente =
         response.data?.idPaciente ??
         response.data?.IdPaciente ??
@@ -1825,46 +1659,57 @@ const enviarFormulario = async () => {
         0
 
       console.log(
-        'ID PACIENTE GENERADO:',
+        "ID PACIENTE GENERADO:",
         idPaciente
       )
 
-      if (
-        !idPaciente ||
-        Number(idPaciente) <= 0
-      ) {
+      // =========================================================
+      // 7. VALIDAR ID
+      // =========================================================
+      if (!idPaciente || Number(idPaciente) <= 0) {
         throw new Error(
-          'El expediente fue guardado, pero no se recibió un IdPaciente válido.'
+          "El expediente fue guardado, pero no se recibió un IdPaciente válido."
         )
       }
 
-      formData.value.Id =
-        Number(idPaciente)
-
-      formData.value.IdPaciente =
-        Number(idPaciente)
+      // =========================================================
+      // 8. GUARDAR ID EN EL FORMULARIO
+      // =========================================================
+      formData.value.Id = Number(idPaciente)
+      formData.value.IdPaciente = Number(idPaciente)
 
       localStorage.setItem(
-        'idPaciente',
+        "idPaciente",
         String(idPaciente)
       )
 
-      /* ===================================================
-         SUBIR ARCHIVOS
-      =================================================== */
+      console.log(
+        "formData.Id:",
+        formData.value.Id
+      )
 
-      await subirArchivosImagenes()
+      console.log(
+        "formData.IdPaciente:",
+        formData.value.IdPaciente
+      )
+
+      // =========================================================
+      // 9. GUARDAR IMÁGENES / ARCHIVOS
+      // =========================================================
+      // Se mantiene separado porque requiere multipart/form-data.
+      if (typeof subirArchivosImagenes === 'function') {
+        await subirArchivosImagenes()
+      }
 
       mostrarAlerta(
-        'Paciente creado correctamente',
-        'success'
+        "Paciente creado correctamente",
+        "success"
       )
     }
 
-    /* =====================================================
-       FINAL
-    ===================================================== */
-
+    // =========================================================
+    // 10. LIMPIAR FORMULARIO
+    // =========================================================
     resetForm()
 
     modoEdicion.value = false
@@ -1875,315 +1720,158 @@ const enviarFormulario = async () => {
   } catch (error: any) {
 
     console.error(
-      'Error al guardar paciente:',
+      "Error al guardar paciente:",
       error
     )
 
-    const mensajeError =
+    // =========================================================
+    // MOSTRAR MENSAJE REAL DEL BACKEND
+    // =========================================================
+    const mensaje =
       error?.response?.data?.mensaje ||
       error?.response?.data?.title ||
       error?.response?.data?.message ||
       error?.response?.data ||
       error?.message ||
-      'Error al guardar paciente'
+      "Error al guardar paciente"
 
     mostrarAlerta(
-      String(mensajeError),
-      'error'
+      String(mensaje),
+      "error"
     )
   }
 }
 
-/* =========================================================
-   EDITAR PACIENTE
-========================================================= */
 
-const editarCita = (
-  paciente: any
-) => {
-  console.log(
-    'Paciente seleccionado para modificar:',
-    paciente
-  )
 
-  formData.value = {
-    Id:
-      paciente.id ??
-      paciente.Id ??
-      0,
+// ✅ EDITAR PACIENTE
+const editarCita = (paciente: any) => {
+  console.log('Paciente seleccionado para modificar:', paciente)
 
-    IdPaciente:
-      paciente.idPaciente ??
-      paciente.IdPaciente ??
-      paciente.id ??
-      paciente.Id ??
-      0,
+  const partes = String(paciente.nombreCompleto || '')
+    .trim()
+    .split(/\s+/)
 
-    Clinica:
-      clinica,
+  let nombre = ''
+  let apellido = ''
 
-    Fecha:
-      paciente.fecha ??
-      paciente.Fecha ??
-      '',
+  if (partes.length === 1) {
+    nombre = partes[0]
+  } else if (partes.length === 2) {
+    nombre = partes[0]
+    apellido = partes[1]
+  } else {
+    nombre = partes.slice(0, 2).join(' ')
+    apellido = partes.slice(2).join(' ')
 
-    Nombre:
-      paciente.nombre ??
-      paciente.Nombre ??
-      '',
-
-    Apellido:
-      paciente.apellido ??
-      paciente.Apellido ??
-      '',
-
-   FechaNacimiento: (
-      paciente.fechaNacimiento ??
-      paciente.FechaNacimiento
-    )
-      ? String(
-          paciente.fechaNacimiento ??
-          paciente.FechaNacimiento
-        ).substring(0, 10)
-      : '',
-
-    Telefono:
-      paciente.telefono ??
-      paciente.Telefono ??
-      '',
-
-    Genero:
-      paciente.genero ??
-      paciente.Genero ??
-      '',
-
-    EstadoCivil:
-      paciente.estadoCivil ??
-      paciente.EstadoCivil ??
-      '',
-
-    Direccion:
-      paciente.direccion ??
-      paciente.Direccion ??
-      '',
-
-    AntecedentesPersona:
-      paciente.antecedentesPersona ??
-      paciente.AntecedentesPersona ??
-      '',
-
-    AntecedentesFamilia:
-      paciente.antecedentesFamilia ??
-      paciente.AntecedentesFamilia ??
-      '',
-
-    AntecedentesQuirurgico:
-      paciente.antecedentesQuirurgico ??
-      paciente.AntecedentesQuirurgico ??
-      '',
-
-    Gestaciones:
-      paciente.gestaciones ??
-      paciente.Gestaciones ??
-      '',
-
-    Partos:
-      paciente.partos ??
-      paciente.Partos ??
-      '',
-
-    Cesareas:
-      paciente.cesareas ??
-      paciente.Cesareas ??
-      '',
-
-    Abortos:
-      paciente.abortos ??
-      paciente.Abortos ??
-      '',
-
-    HijosVivos:
-      paciente.hijosVivos ??
-      paciente.HijosVivos ??
-      '',
-
-    HijosMuertos:
-      paciente.hijosMuertos ??
-      paciente.HijosMuertos ??
-      '',
-
-    DescripcionHabitos:
-      paciente.descripcionHabitos ??
-      paciente.DescripcionHabitos ??
-      '',
-
-    EstadoInmunizacion:
-      paciente.estadoInmunizacion ??
-      paciente.EstadoInmunizacion ??
-      '',
-
-    NivelActividadFisica:
-      paciente.nivelActividadFisica ??
-      paciente.NivelActividadFisica ??
-      '',
-
-    EstadoAlergia:
-      paciente.estadoAlergia ??
-      paciente.EstadoAlergia ??
-      '',
-
-    Alergia:
-      paciente.alergia ??
-      paciente.Alergia ??
-      '',
-
-    Medicacion:
-      paciente.medicacion ??
-      paciente.Medicacion ??
-      '',
-
-    HistoriaEnfermedad:
-      paciente.historiaEnfermedad ??
-      paciente.HistoriaEnfermedad ??
-      '',
-
-    PresionArterial:
-      paciente.presionArterial ??
-      paciente.PresionArterial ??
-      '',
-
-    FrecuenciaCardiaca:
-      paciente.frecuenciaCardiaca ??
-      paciente.FrecuenciaCardiaca ??
-      '',
-
-    FrecuenciaRespiratoria:
-      paciente.frecuenciaRespiratoria ??
-      paciente.FrecuenciaRespiratoria ??
-      '',
-
-    SaturacionOxigeno:
-      paciente.saturacionOxigeno ??
-      paciente.SaturacionOxigeno ??
-      '',
-
-    PesoExamenFisico:
-      paciente.pesoExamenFisico ??
-      paciente.PesoExamenFisico ??
-      '',
-
-    Temperatura:
-      paciente.temperatura ??
-      paciente.Temperatura ??
-      '',
-
-    Peso:
-      paciente.peso ??
-      paciente.Peso ??
-      '',
-
-    Estatura:
-      paciente.estatura ??
-      paciente.Estatura ??
-      '',
-
-    IndiceMasaCorporal:
-      paciente.indiceMasaCorporal ??
-      paciente.IndiceMasaCorporal ??
-      '',
-
-    RevisionAparatosSistemas:
-      paciente.revisionAparatosSistemas ??
-      paciente.RevisionAparatosSistemas ??
-      '',
-
-    ResultadosLaboratorio:
-      paciente.resultadosLaboratorio ??
-      paciente.ResultadosLaboratorio ??
-      '',
-
-    InterpretacionElectrocardiograma:
-      paciente.interpretacionElectrocardiograma ??
-      paciente.InterpretacionElectrocardiograma ??
-      '',
-
-    EstudiosImagen:
-      paciente.estudiosImagen ??
-      paciente.EstudiosImagen ??
-      '',
-
-    ResultadoEvaluacion:
-      paciente.resultadoEvaluacion ??
-      paciente.ResultadoEvaluacion ??
-      '',
-
-    Diagnostica:
-      paciente.diagnostica ??
-      paciente.Diagnostica ??
-      '',
-
-    TratamientoIndicado:
-      paciente.tratamientoIndicado ??
-      paciente.TratamientoIndicado ??
-      ''
   }
 
-  console.log(
-    'Datos cargados para modificar:',
-    formData.value
-  )
+  formData.value = {
+    Id: paciente.id ?? 0,
+    IdPaciente: paciente.id?? 0,
+    Nombre: paciente.nombre ?? Nombre ?? '', 
+    Apellido: paciente.apellido ?? Apellido ?? '', 
+    FechaNacimiento: paciente.fechaNacimiento
+      ? String(paciente.fechaNacimiento).substring(0, 10)
+      : '',
+    Telefono: paciente.telefono ?? '',
+    Genero: paciente.genero ?? '',
+    EstadoCivil: paciente.estadoCivil ?? '',
+    Direccion: paciente.direccion ?? '',
+    AntecedentesPersona: paciente.antecedentesPersona || '',
+    AntecedentesFamilia: paciente.antecedentesFamilia || '',
+    AntecedentesQuirurgico: paciente.antecedentesQuirurgico || '',
 
-  pestañaActiva.value =
-    'paciente'
+    Gestaciones: paciente.gestaciones ?? '',
+    Partos: paciente.partos ?? '',
+    Cesareas: paciente.cesareas ?? '',
+    Abortos: paciente.abortos ?? '',
+    HijosVivos: paciente.hijosVivos ?? '',
+    HijosMuertos: paciente.hijosMuertos ?? '',
 
+    DescripcionHabitos: paciente.descripcionHabitos ?? '',
+    EstadoInmunizacion: paciente.estadoInmunizacion ?? '',
+    NivelActividadFisica: paciente.nivelActividadFisica ?? '',
+
+    EstadoAlergia: paciente.estadoAlergia ?? '',
+    Alergia: paciente.alergia ?? '',
+
+    Medicacion: paciente.medicacion ?? '',
+
+    HistoriaEnfermedad: paciente.historiaEnfermedad ?? paciente.HistoriaEnfermedad ?? '',
+
+    PresionArterial: paciente.presionArterial ?? paciente.PresionArterial ?? '', 
+    FrecuenciaCardiaca: paciente.frecuenciaCardiaca ?? paciente.FrecuenciaCardiaca ?? '', 
+    FrecuenciaRespiratoria: paciente.frecuenciaRespiratoria ?? paciente.FrecuenciaRespiratoria ?? '', 
+    SaturacionOxigeno: paciente.saturacionOxigeno ?? paciente.SaturacionOxigeno ?? '', 
+    PesoExamenFisico: paciente.pesoExamenFisico ?? paciente.PesoExamenFisico ?? '', 
+    Temperatura: paciente.temperatura ?? paciente.Temperatura ?? '',
+    Peso: paciente.peso ?? paciente.Peso ?? '',
+    Estatura: paciente.estatura ?? paciente.Estatura ?? '',
+    IndiceMasaCorporal: paciente.indiceMasaCorporal ?? paciente.IndiceMasaCorporal ?? '',
+
+    RevisionAparatosSistemas: paciente.revisionAparatosSistemas ?? paciente.RevisionAparatosSistemas ?? '',
+
+    ResultadosLaboratorio: paciente.resultadosLaboratorio ?? paciente.ResultadosLaboratorio ?? '',
+
+    InterpretacionElectrocardiograma: paciente.interpretacionElectrocardiograma ?? paciente.InterpretacionElectrocardiograma ?? '',
+
+    EstudiosImagen: paciente.estudiosImagen ?? paciente.EstudiosImagen ?? '',
+
+    ResultadoEvaluacion: paciente.resultadoEvaluacion ?? paciente.ResultadoEvaluacion ?? '',
+
+    Diagnostica: paciente.diagnostica ?? paciente.Diagnostica ?? '',
+
+    TratamientoIndicado: paciente.tratamientoIndicado ?? paciente.TratamientoIndicado ?? ''
+
+  }
+
+  console.log('Datos cargados para modificar:', formData.value)
+
+  pestañaActiva.value = 'paciente'
   modoEdicion.value = true
   modoEdicionbtnNuevo.value = false
 }
 
-/* =========================================================
-   ANTECEDENTES
-========================================================= */
 
+// =========================================================
+// 📝 ANTECEDENTES PERSONALES
+// =========================================================
 const antecedentesPersonales = ref({
   AntecedentesPersona: ''
 })
+const guardandoAntecedentesPersonales = ref(false)
 
-const guardandoAntecedentesPersonales =
-  ref(false)
-
+// =========================================================
+// 📝 ANTECEDENTES Familia
+// =========================================================
 const antecedentesFamiliares = ref({
   antecedentesFamilia: ''
 })
+const guardandoAntecedentesFamiliares = ref(false)
 
-const guardandoAntecedentesFamiliares =
-  ref(false)
-
+// =========================================================
+// 📝 ANTECEDENTES Quirurgicos
+// =========================================================
 const antecedentesQuirurgicos = ref({
   antecedentesQuirurgico: ''
 })
+const guardandoAntecedentesQuirurgicos = ref(false)
 
-const guardandoAntecedentesQuirurgicos =
-  ref(false)
 
-/* =========================================================
-   ELIMINAR
-========================================================= */
 
-const eliminarCita = (
-  id: number
-) => {
+// ✅ ELIMINAR
+const eliminarCita = (id: number) => {
   abrirConfirmacionEliminar(id)
 }
 
-/* =========================================================
-   MOUNT
-========================================================= */
-
+// ✅ MOUNT
 onMounted(() => {
   cargarPacientes()
 })
-</script>
 
+
+</script>
 
 <template #actions>
   <DefaultLayout>
