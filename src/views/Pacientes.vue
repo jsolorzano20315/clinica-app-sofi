@@ -88,6 +88,10 @@ const API_URL_PlanTerapeutico_Guardar = `${API_URL}/PlanTerapeutico/GuardarPlanT
 const modoEdicion = ref(false)
 const modoEdicionbtnNuevo = ref(true)
 
+
+//El flujo completo
+
+
 /* =========================================================
 Agrega los estados para archivos
 ========================================================= */
@@ -314,6 +318,7 @@ const pageTitle = ref('Pacientes')
 // ✅ INTERFACE CORRECTA
 interface Paciente {
   id: number
+  idPaciente: number
   nombreCompleto: string
   Nombre: string
   Apellido: string
@@ -1074,20 +1079,99 @@ const resetForm = () => {
     IndiceMasaCorporal: '',
 
     RevisionAparatosSistemas: '',
-
     ResultadosLaboratorio: '',
-
     InterpretacionElectrocardiograma: '',
-
     EstudiosImagen: '',
-
     ResultadoEvaluacion: '',
-
-    Diagnostica: '',
-
+    Diagnostica: ''
   }
 
   pestañaActiva.value = 'paciente'
+}
+
+
+// =========================================================
+// 🔢 CONVERTIR ENTEROS OPCIONALES
+// '' → null
+// =========================================================
+const convertirEnteroONull = (valor: any): number | null => {
+  if (
+    valor === '' ||
+    valor === null ||
+    valor === undefined
+  ) {
+    return null
+  }
+
+  const numero = Number(valor)
+
+  return Number.isInteger(numero) ? numero : null
+}
+
+// =========================================================
+// 🔢 CONVERTIR DECIMALES
+// '' → null
+// =========================================================
+
+const convertirDecimalONull = (valor: any): number | null => {
+  if (
+    valor === '' ||
+    valor === null ||
+    valor === undefined
+  ) {
+    return null
+  }
+
+  const numero = Number(valor)
+
+  return Number.isNaN(numero) ? null : numero
+}
+
+
+// VALIDAR DATOS AL GUARDAR POR PRIMERA VEZ
+const validarDatosObligatorios = (): boolean => {
+  const camposFaltantes: string[] = []
+
+  if (!formData.value.Nombre?.trim()) {
+    camposFaltantes.push('Nombre')
+  }
+
+  if (!formData.value.Apellido?.trim()) {
+    camposFaltantes.push('Apellido')
+  }
+
+  if (!formData.value.FechaNacimiento) {
+    camposFaltantes.push('Fecha de nacimiento')
+  }
+
+  if (!formData.value.Telefono?.trim()) {
+    camposFaltantes.push('Teléfono')
+  }
+
+  if (!formData.value.Genero) {
+    camposFaltantes.push('Género')
+  }
+
+  if (!formData.value.EstadoCivil) {
+    camposFaltantes.push('Estado civil')
+  }
+
+  if (!formData.value.Direccion?.trim()) {
+    camposFaltantes.push('Dirección')
+  }
+
+  if (camposFaltantes.length > 0) {
+    mostrarAlerta(
+      `Debe ingresar los siguientes datos obligatorios:\n\n${camposFaltantes
+        .map(campo => `• ${campo}`)
+        .join('\n')}`,
+      'warning'
+    )
+
+    return false
+  }
+
+  return true
 }
 
 
@@ -1097,6 +1181,13 @@ const enviarFormulario = async () => {
     // =========================================================
     // 1. DATOS GENERALES
     // =========================================================
+    // Validar datos obligatorios antes de guardar
+      if (!modoEdicion.value) {
+        if (!validarDatosObligatorios()) {
+          return
+        }
+      }
+
     formData.value.Clinica = clinica
     formData.value.IndiceMasaCorporal = imc.value
 
@@ -1130,15 +1221,50 @@ const enviarFormulario = async () => {
         formData.value
       )
 
-      // =======================================================
-      // GINECO-OBSTÉTRICOS SOLO PARA MUJER
-      // =======================================================
+      // =========================
+      // GINECO-OBSTÉTRICOS
+      // =========================
       if (genero === 'F' || genero === 'FEMENINO') {
+
+        const ginecoObstetricosEditar = {
+          ...formData.value,
+
+          Gestaciones: convertirEnteroONull(
+            formData.value.Gestaciones
+          ),
+          Partos: convertirEnteroONull(
+            formData.value.Partos
+          ),
+          Cesareas: convertirEnteroONull(
+            formData.value.Cesareas
+          ),
+          Abortos: convertirEnteroONull(
+            formData.value.Abortos
+          ),
+          HijosVivos: convertirEnteroONull(
+            formData.value.HijosVivos
+          ),
+          HijosMuertos: convertirEnteroONull(
+            formData.value.HijosMuertos
+          )
+        }
+
+        console.log(
+          'PAYLOAD PUT GINECO-OBSTÉTRICOS:',
+          ginecoObstetricosEditar
+        )
+
+        console.log(
+          'ID PACIENTE:',
+          formData.value.IdPaciente
+        )
+
         await axios.put(
           `${API_URL}/GinecoObstetricos/EditarGinecoObstetricos/${formData.value.IdPaciente}`,
-          formData.value
+          ginecoObstetricosEditar
         )
       }
+
 
       await axios.put(
         `${API_URL}/Habitos/EditarHabitos/${formData.value.IdPaciente}`,
@@ -1170,15 +1296,82 @@ const enviarFormulario = async () => {
         formData.value
       )
 
-      await axios.put(
-        `${API_URL}/ExamenFisico/EditarExamenFisico/${formData.value.IdPaciente}`,
-        formData.value
+
+      // =========================
+      // Examen Físico
+      // =========================
+      const examenFisicoEditar = {
+        ...formData.value,
+
+        PresionArterial: formData.value.PresionArterial || null,
+
+        FrecuenciaCardiaca: convertirEnteroONull(
+          formData.value.FrecuenciaCardiaca
+        ),
+
+        FrecuenciaRespiratoria: convertirEnteroONull(
+          formData.value.FrecuenciaRespiratoria
+        ),
+
+        SaturacionOxigeno: convertirEnteroONull(
+          formData.value.SaturacionOxigeno
+        ),
+
+        PesoExamenFisico: convertirDecimalONull(
+          formData.value.PesoExamenFisico
+        ),
+
+        Temperatura: convertirDecimalONull(
+          formData.value.Temperatura
+        ),
+
+        Peso: convertirDecimalONull(
+          formData.value.Peso
+        ),
+
+        Estatura: convertirDecimalONull(
+          formData.value.Estatura
+        ),
+
+        IndiceMasaCorporal: convertirDecimalONull(
+          formData.value.IndiceMasaCorporal
+        )
+      }
+
+      console.log(
+        'PAYLOAD PUT EXAMEN FÍSICO:',
+        examenFisicoEditar
       )
 
       await axios.put(
-        `${API_URL}/MC/EditarMC/${formData.value.IdPaciente}`,
-        formData.value
+        `${API_URL}/ExamenFisico/EditarExamenFisico/${formData.value.IdPaciente}`,
+        examenFisicoEditar
       )
+
+      // =========================
+      // IMC
+      // =========================
+         const mcEditar = {
+          ...formData.value,
+
+          Peso: convertirDecimalONull(
+            formData.value.Peso
+          ),
+
+          Estatura: convertirDecimalONull(
+            formData.value.Estatura
+          )
+        }
+
+        console.log(
+          'PAYLOAD PUT MC:',
+          mcEditar
+        )
+
+        await axios.put(
+          `${API_URL}/MC/EditarMC/${formData.value.IdPaciente}`,
+          mcEditar
+        )
 
       await axios.put(
         `${API_URL}/ROAS/EditarROAS/${formData.value.IdPaciente}`,
@@ -1285,24 +1478,6 @@ const enviarFormulario = async () => {
         AntecedentesQuirurgico:
           formData.value.AntecedentesQuirurgico
       }
-
-      // ---------------------------------------------------------
-// GINECO-OBSTÉTRICOS
-// SOLO MUJER
-// ---------------------------------------------------------
-const convertirEnteroONull = (valor: any): number | null => {
-  if (
-    valor === '' ||
-    valor === null ||
-    valor === undefined
-  ) {
-    return null
-  }
-
-  const numero = Number(valor)
-
-  return Number.isNaN(numero) ? null : numero
-}
 
 const ginecoObstetricos =
   genero === 'F' || genero === 'FEMENINO'
@@ -1768,9 +1943,9 @@ const editarCita = (paciente: any) => {
 
   formData.value = {
     Id: paciente.id ?? 0,
-    IdPaciente: paciente.id?? 0,
-    Nombre: paciente.nombre ?? Nombre ?? '', 
-    Apellido: paciente.apellido ?? Apellido ?? '', 
+    IdPaciente: paciente.idPaciente ?? paciente.id ?? 0,
+    Nombre: paciente.nombre ?? paciente.Nombre ?? '',
+    Apellido: paciente.apellido ?? paciente.Apellido ?? '',
     FechaNacimiento: paciente.fechaNacimiento
       ? String(paciente.fechaNacimiento).substring(0, 10)
       : '',
@@ -1870,8 +2045,8 @@ onMounted(() => {
   cargarPacientes()
 })
 
-
 </script>
+
 
 <template #actions>
   <DefaultLayout>
@@ -4088,6 +4263,8 @@ onMounted(() => {
         <!-- TABLA PACIENTES -->
         <!-- ===================== -->
        <DefaultCard cardTitle="Listado de Identificación de Pacientes" class="border-0 shadow-none">
+
+       
               <table class="min-w-full divide-y divide-gray-200">
 
               <!-- HEADER -->

@@ -67,6 +67,8 @@ interface FormData {
   Motivos: string
   Telefono: string
   NombrePaciente: string
+  Genero: string
+  EstadoCivil: string
   UltimaFechaCita: string
   TotalCitas: number
   Clinica: string
@@ -91,6 +93,8 @@ const cargarCitas = async () => {
       Motivos: c.Motivos ?? c.motivos,
       Telefono: c.Telefono ?? c.telefono ?? c.Telefono,
       NombrePaciente: c.NombrePaciente ?? c.nombrePaciente,
+      Genero: c.Genero ?? c.genero,
+      EstadoCivil: c.EstadoCivil ?? c.estadoCivil,
       UltimaFechaCita: c.UltimaFechaCita ?? c.ultimaFechaCita,
       TotalCitas: c.TotalCitas ?? c.totalCitas,
       Clinica: c.Clinica ?? c.clinica
@@ -170,6 +174,8 @@ const exportarExcel = () => {
     Paciente: cita.NombrePaciente,
     Teléfono: cita.Telefono,
     "Historial Clinico": cita.Motivos,
+     Genero:  cita.Genero,
+    "Estado Civil":  cita.EstadoCivil,
     "Fecha Última Cita": formatearFecha(cita.UltimaFechaCita),
     "Total Citas": cita.TotalCitas,
      Clínica: cita.Clinica
@@ -229,7 +235,9 @@ const exportarPDF = () => {
   const data = filteredCitas.value.map(cita => [
     cita.NombrePaciente,
     cita.Telefono,
-    cita.Motivos,
+    cita.Genero,
+    cita.EstadoCivil,
+    cita.Motivos,   
     formatearFecha(cita.UltimaFechaCita),
     cita.TotalCitas,
     cita.Clinica
@@ -241,6 +249,8 @@ const exportarPDF = () => {
     head: [[
       'Paciente',
       'Teléfono',
+      'Genero',
+      'Estado Civil',
       'Historial clínico',
       'Última Cita',
       'Total Citas',
@@ -264,10 +274,12 @@ const exportarPDF = () => {
     columnStyles: {
       0: { cellWidth: 30 }, // Paciente
       1: { cellWidth: 25 }, // Teléfono
-      2: { cellWidth: 50 }, // Historial
-      3: { cellWidth: 25 }, // Fecha
-      4: { cellWidth: 20 }, // Total
-      5: { cellWidth: 30 }  // Clínica
+      2: { cellWidth: 25 }, // Genero
+      3: { cellWidth: 25 }, // EstadoCivil
+      4: { cellWidth: 50 }, // Historial
+      5: { cellWidth: 25 }, // Fecha
+      6: { cellWidth: 20 }, // Total
+      7: { cellWidth: 30 }  // Clínica
     },
 
     alternateRowStyles: {
@@ -345,17 +357,19 @@ const exportarPDFIndividual = (cita: FormData) => {
 
   doc.text(`Nombre: ${cita.NombrePaciente}`, 14, 52)
   doc.text(`Teléfono: ${cita.Telefono}`, 14, 58)
-  //doc.text(`Clínica: ${cita.Clinica}`, 14, 64)
-  doc.text(`Última cita: ${formatearFecha(cita.UltimaFechaCita)}`, 14, 64)
-  doc.text(`Total citas: ${cita.TotalCitas}`, 14, 70)
+  doc.text(`Genero: ${cita.Genero}`, 14, 64)
+  doc.text(`EstadoCivil: ${cita.EstadoCivil}`, 14, 70)
+  //doc.text(`Clínica: ${cita.Clinica}`, 14, 76)
+  doc.text(`Última cita: ${formatearFecha(cita.UltimaFechaCita)}`, 14, 82)
+  doc.text(`Total citas: ${cita.TotalCitas}`, 14, 88)
 
   // =============================
   // 📋 TABLA HISTORIAL
   // =============================
   autoTable(doc, {
-    startY: 76,
+    startY: 94,
     head: [['Historial clínico']],
-    body: [[cita.Motivos]],
+    body: [['Motivo de la cita  :' + ' ' + cita.Motivos]],
     styles: {
       fontSize: 10,
       cellPadding: 4
