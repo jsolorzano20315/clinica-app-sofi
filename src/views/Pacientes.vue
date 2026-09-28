@@ -1175,8 +1175,11 @@ const validarDatosObligatorios = (): boolean => {
 }
 
 
+const guardando = ref(false)
+
 // ✅ GUARDAR
 const enviarFormulario = async () => {
+
   try {
     // =========================================================
     // 1. DATOS GENERALES
@@ -1187,6 +1190,9 @@ const enviarFormulario = async () => {
           return
         }
       }
+
+       // 🔄 ACTIVAR INDICADOR DE PROCESO
+        guardando.value = true
 
     formData.value.Clinica = clinica
     formData.value.IndiceMasaCorporal = imc.value
@@ -1910,10 +1916,15 @@ const ginecoObstetricos =
       error?.message ||
       "Error al guardar paciente"
 
-    mostrarAlerta(
+   mostrarAlerta(
       String(mensaje),
       "error"
     )
+
+  } finally {
+
+    // 🔄 FINALIZÓ TODO EL PROCESO
+    guardando.value = false
   }
 }
 
@@ -2044,6 +2055,7 @@ const eliminarCita = (id: number) => {
 onMounted(() => {
   cargarPacientes()
 })
+
 
 </script>
 
@@ -4237,17 +4249,55 @@ onMounted(() => {
               </div>
 
          
-           <!-- BOTÓN GUARDAR -->
+          <!-- BOTÓN GUARDAR / MODIFICAR -->
             <div class="flex justify-start">
               <button
                 type="submit"
-                :class="modoEdicion ? 'bg-yellow-600' : 'bg-primary'"
-                class="rounded p-3 text-white"
+                :disabled="guardando"
+                :class="[
+                  modoEdicion ? 'bg-yellow-600' : 'bg-primary',
+                  guardando
+                    ? 'cursor-not-allowed opacity-70'
+                    : 'hover:opacity-90'
+                ]"
+                class="rounded p-3 text-white flex items-center gap-2"
               >
-                {{ modoEdicion ? 'Modificar Datos' : 'Guardar Datos' }}
-              </button>
-              
 
+                <!-- RELOJ / SPINNER -->
+                <svg
+                  v-if="guardando"
+                  class="h-5 w-5 animate-spin"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  />
+
+                  <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                  />
+                </svg>
+
+                <!-- TEXTO NORMAL -->
+                <span v-if="!guardando">
+                  {{ modoEdicion ? 'Modificar Datos' : 'Guardar Datos' }}
+                </span>
+
+                <!-- TEXTO DURANTE PROCESO -->
+                <span v-else>
+                  {{ modoEdicion ? 'Modificando datos...' : 'Guardando datos...' }}
+                </span>
+
+              </button>
             </div>
 
           
