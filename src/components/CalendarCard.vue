@@ -1,9 +1,7 @@
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 import axios from 'axios'
-import { onBeforeUnmount } from 'vue'
 import Swal from 'sweetalert2'
-import { enviarWhatsAppAPI } from '@/services/whatsappService'
 
 const email = localStorage.getItem("email") || ''
 const clinica = localStorage.getItem("clinica") || ''
@@ -222,41 +220,124 @@ const cita = ref({
   clinica: null
 })
 
+
+
 // =====================
 // 📱 WHATSAPP (PRO CLEAN)
 // =====================
 const formatearTelefono = (tel: string) => tel.replace(/\D/g, '')
 
-const generarMensajeWhatsApp = (evento: Evento, fecha: string) => {
-  const idSeguro = evento.id ?? 'sin-id'
-  return (
-    `Hola ${evento.nombreCompleto}\n\n` +
-    `Le recordamos su cita para el ${formatearFecha(fecha)}:${evento.hora}.\n\n` +
-    `[CONFIRMAR]\n` +
-    `https://clinica-api-sofi.onrender.com/api/citas/confirmar/${idSeguro}\n\n` +
-    `[CANCELAR]\n` +
-    `https://clinica-api-sofi.onrender.com/api/citas/cancelar/${idSeguro}\n\n` +
-    `[REPROGRAMAR]\n` +
-    `https://clinica-api-sofi.onrender.com/api/citas/reprogramar/${idSeguro}\n\n` +
-    `Saludos,\n${evento.clinica}`
-  )
-}
+//const generarMensajeWhatsApp = (evento: Evento, fecha: string) => {
+  //const idSeguro = evento.id ?? 'sin-id'
+ // return (
+ //   `Hola ${evento.nombreCompleto}\n\n` +
+ //   `Le recordamos su cita para el ${formatearFecha(fecha)}:${evento.hora}.\n\n` +
+   // `[CONFIRMAR]\n` +
+  //  `https://localhost:44387/api/citas/confirmar/${idSeguro}\n\n` +
+  //  `[CANCELAR]\n` +
+   // `https://localhost:44387/api/citas/cancelar/${idSeguro}\n\n` +
+   // `[REPROGRAMAR]\n` +
+  //  `https://localhost:44387/api/citas/reprogramar/${idSeguro}\n\n` +
+  //  `Saludos,\n${evento.clinica}`
+ // )
+//}
 
-const enviarWhatsApp = (evento: Evento, fecha: string) => {
+
+const enviarWhatsApp = async (evento: Evento, fecha: string) => {
+
   if (!evento.telefono) {
-    alert('Este evento no tiene teléfono')
+    Swal.fire({
+      icon: 'warning',
+      title: 'Sin teléfono',
+      text: 'Este evento no tiene teléfono registrado.'
+    })
     return
   }
 
-  const telefonoLimpio = formatearTelefono(evento.telefono)
+  if (!evento.id) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'La cita no tiene un identificador válido.'
+    })
+    return
+  }
 
-  const url = `https://wa.me/${telefonoLimpio}?text=${encodeURIComponent(
-    generarMensajeWhatsApp(evento, fecha)
-  )}`
+  // 🔥 Abrir inmediatamente para evitar bloqueo del navegador
+  const ventanaWhatsApp = window.open('', '_blank')
 
-  window.open(url, '_blank')
-  
+  if (!ventanaWhatsApp) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Ventana bloqueada',
+      text: 'El navegador bloqueó la ventana de WhatsApp. Permita ventanas emergentes para este sitio.'
+    })
+
+    return
+  }
+
+  try {
+
+    const payload = {
+      id: evento.id,
+      nombreCompleto: evento.nombreCompleto,
+      telefono: formatearTelefono(evento.telefono),
+      fecha: fecha,
+      hora: evento.hora || '',
+      clinica: evento.clinica
+    }
+
+    console.log('📲 PAYLOAD WHATSAPP:', payload)
+
+    const response = await axios.post(
+      `${API_URL}/WhatsApp/enviar`,
+      payload
+    )
+
+    console.log('📲 RESPUESTA API:', response.data)
+
+    const urlWhatsApp = response.data?.url
+
+    if (!urlWhatsApp) {
+
+      ventanaWhatsApp.close()
+
+      Swal.fire({
+        icon: 'error',
+        title: 'WhatsApp',
+        text: 'La API no devolvió el enlace de WhatsApp.'
+      })
+
+      return
+    }
+
+    console.log(
+      '🌐 URL WHATSAPP:',
+      urlWhatsApp
+    )
+
+    // 🔥 Navegar la ventana que ya fue creada
+    ventanaWhatsApp.location.href = urlWhatsApp
+
+  } catch (error: any) {
+
+    ventanaWhatsApp.close()
+
+    console.error(
+      '❌ Error enviando WhatsApp:',
+      error.response?.data || error
+    )
+
+    Swal.fire({
+      icon: 'error',
+      title: 'WhatsApp',
+      text:
+        error.response?.data?.message ||
+        'No se pudo generar el enlace de WhatsApp.'
+    })
+  }
 }
+
 
 //Formatear fecha
 const formatearFecha = (fecha: string) => {
@@ -650,7 +731,7 @@ const guardarEvento = async () => {
   
   if (!selectedDay.value || !cita.value.motivo?.trim()) return
 
-  if (!cita.value.hora) {
+  if (cita.value.hora) {
 
   Swal.fire({
     icon: 'warning',
@@ -903,9 +984,9 @@ onMounted(async () => {
   detectarCitasRiesgo()
 
    // 🔥 EJECUCIÓN AUTOMÁTICA CADA 1 MINUTO
-   intervaloRiesgo = setInterval(() => {
-    detectarCitasRiesgo()
-  }, 60000)
+    //intervaloRiesgo = setInterval(() => {
+    // detectarCitasRiesgo()
+   //}, 60000)
 
 })
 
@@ -999,9 +1080,9 @@ onBeforeUnmount(() => {
                 {{ ev.tipo }}
               </div>
 
-             <div class="text-[10px] font-bold text-blue-700">
+             <!-- <div class="text-[10px] font-bold text-blue-700">
                 🕒 {{ ev.hora }}
-              </div>
+              </div>-->
 
               <!-- estado -->
               <div
@@ -1012,12 +1093,13 @@ onBeforeUnmount(() => {
                   'text-gray-700': calcularEstadoVisual(ev) === 'Cancelada'
                 }"
               >
+              📌
                 {{ calcularEstadoVisual(ev) }}
               </div>
 
               <!-- nombre -->
               <div class="text-gray-600 truncate">
-                {{ ev.nombreCompleto }}
+               👤 {{ ev.nombreCompleto }}
               </div>
 
               <!-- acciones -->
@@ -1242,7 +1324,7 @@ onBeforeUnmount(() => {
             <!-- ===================== -->
             <div>
 
-              <label class="text-sm text-gray-600 mb-2 block font-medium">
+               <!--<label class="text-sm text-gray-600 mb-2 block font-medium">
                 Hora de la cita
               </label>
 
@@ -1262,10 +1344,10 @@ onBeforeUnmount(() => {
                       focus:border-blue-400"
 
                 required
-              />
+              />-->
 
               <!-- INFO -->
-              <div class="mt-2 text-xs text-gray-500 space-y-1">
+              <!-- <div class="mt-2 text-xs text-gray-500 space-y-1">
 
                 <p>
                   🕒 Horario disponible:
@@ -1277,7 +1359,7 @@ onBeforeUnmount(() => {
                   {{ intervaloMinutos }} minutos
                 </p>
 
-              </div>
+              </div>-->
 
             </div>
 
@@ -1318,9 +1400,9 @@ onBeforeUnmount(() => {
 
             </div>
 
-            <p class="text-xs text-gray-400 mt-1">
+           <!-- <p class="text-xs text-gray-400 mt-1">
               Gris = ocupada
-            </p>
+            </p>-->
           </div>
 
 

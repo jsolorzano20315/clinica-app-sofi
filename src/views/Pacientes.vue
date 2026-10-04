@@ -4,6 +4,7 @@ import DefaultCard from '@/components/Forms/DefaultCard.vue'
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
 import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
+import DocumentosPaciente from '@/views/DocumentosPaciente.vue'
 
 /* =========================================================
    ⚙️ CONFIGURACIÓN GENERAL
@@ -105,6 +106,7 @@ interface ArchivoImagen {
 }
 
 const archivosImagenes = ref<ArchivoImagen[]>([])
+const archivosPendientes = ref<ArchivoPendiente[]>([])
 const cargandoImagen = ref(false)
 
 
@@ -176,10 +178,15 @@ const formatearTamañoArchivo = (bytes: number) => {
 }
 
 
+
 /* =========================================================
-Función para subir los archivos
+   Función para subir los archivos
 ========================================================= */
 const subirArchivosImagenes = async () => {
+
+  // =========================================================
+  // 1. VALIDAR QUE EL PACIENTE YA ESTÉ GUARDADO
+  // =========================================================
   if (!formData.value.Id) {
     mostrarAlerta(
       'Primero debe guardar el paciente antes de adjuntar imágenes.',
@@ -188,32 +195,107 @@ const subirArchivosImagenes = async () => {
     return
   }
 
+  // =========================================================
+  // 2. VALIDAR QUE EXISTA EL CAMPO DE IMÁGENES
+  // =========================================================
+  if (
+    !archivosImagenes.value ||
+    !Array.isArray(archivosImagenes.value)
+  ) {
+    mostrarAlerta(
+      'No se encontró el campo para adjuntar imágenes.',
+      'warning'
+    )
+    return
+  }
+
+  // =========================================================
+  // 3. OBTENER ÚNICAMENTE LOS ARCHIVOS QUE TIENEN ARCHIVO
+  // =========================================================
   const archivosPendientes = archivosImagenes.value.filter(
-    archivo => archivo.archivo
+    item =>
+      item &&
+      item.archivo &&
+      item.archivo instanceof File &&
+      item.archivo.size > 0
   )
 
+  // =========================================================
+  // 4. VALIDAR QUE EL CAMPO IMAGEN NO ESTÉ VACÍO
+  // =========================================================
   if (archivosPendientes.length === 0) {
     mostrarAlerta(
-      'No hay archivos nuevos para subir.',
+      'Debe adjuntar al menos una imagen o documento antes de continuar.',
+      'warning'
+    )
+    return
+  }
+
+  // =========================================================
+  // 5. VALIDAR EXTENSIONES PERMITIDAS
+  // =========================================================
+  const extensionesPermitidas = [
+    'image/jpeg',
+    'image/png',
+    'image/webp',
+    'application/pdf'
+  ]
+
+  const archivoInvalido = archivosPendientes.find(
+    item => !extensionesPermitidas.includes(item.archivo.type)
+  )
+
+  if (archivoInvalido) {
+    mostrarAlerta(
+      `El archivo "${archivoInvalido.archivo.name}" no tiene un formato permitido.`,
       'warning'
     )
     return
   }
 
   try {
+
+    // =========================================================
+    // 6. ACTIVAR INDICADOR DE CARGA
+    // =========================================================
     cargandoImagen.value = true
 
+    // =========================================================
+    // 7. CREAR FORM DATA
+    // =========================================================
     const datos = new FormData()
 
-    datos.append('IdPaciente', String(formData.value.Id))
-    datos.append('Clinica', clinica)
+    datos.append(
+      'IdPaciente',
+      String(formData.value.Id)
+    )
 
+    datos.append(
+      'Clinica',
+      clinica
+    )
+
+    // =========================================================
+    // 8. AGREGAR LOS ARCHIVOS
+    // =========================================================
     archivosPendientes.forEach(item => {
-      if (item.archivo) {
-        datos.append('Archivos', item.archivo)
+
+      if (
+        item.archivo &&
+        item.archivo instanceof File
+      ) {
+        datos.append(
+          'Archivos',
+          item.archivo,
+          item.archivo.name
+        )
       }
+
     })
 
+    // =========================================================
+    // 9. ENVIAR AL API
+    // =========================================================
     await axios.post(
       `${API_URL}/Pacientes/SubirImagenes`,
       datos,
@@ -224,27 +306,51 @@ const subirArchivosImagenes = async () => {
       }
     )
 
+    // =========================================================
+    // 10. MOSTRAR RESULTADO
+    // =========================================================
     mostrarAlerta(
       'Las imágenes se registraron correctamente.',
       'success'
     )
 
-    // Quitar únicamente los archivos que ya fueron enviados
-    archivosImagenes.value = archivosImagenes.value.filter(
-      archivo => !archivo.archivo
-    )
+    // =========================================================
+    // 11. ELIMINAR ÚNICAMENTE LOS ARCHIVOS YA ENVIADOS
+    // =========================================================
+    archivosImagenes.value =
+      archivosImagenes.value.filter(
+        archivo => !archivo.archivo
+      )
 
   } catch (error) {
-    console.error('Error al subir imágenes:', error)
+
+    console.error(
+      'Error al subir imágenes:',
+      error
+    )
+
+    // =========================================================
+    // MOSTRAR MENSAJE DEL API SI EXISTE
+    // =========================================================
+    const mensaje =
+      error.response?.data?.mensaje ||
+      'Error al registrar las imágenes.'
 
     mostrarAlerta(
-      'Error al registrar las imágenes.',
+      mensaje,
       'error'
     )
+
   } finally {
+
+    // =========================================================
+    // 12. DESACTIVAR CARGA
+    // =========================================================
     cargandoImagen.value = false
   }
 }
+
+
 
 /* =========================================================
    Nuevo Paciente
@@ -1931,7 +2037,7 @@ const ginecoObstetricos =
 
 
 // ✅ EDITAR PACIENTE
-const editarCita = (paciente: any) => {
+const editarCita = async (paciente: any) => {
   console.log('Paciente seleccionado para modificar:', paciente)
 
   const partes = String(paciente.nombreCompleto || '')
@@ -1949,24 +2055,32 @@ const editarCita = (paciente: any) => {
   } else {
     nombre = partes.slice(0, 2).join(' ')
     apellido = partes.slice(2).join(' ')
-
   }
 
   formData.value = {
     Id: paciente.id ?? 0,
     IdPaciente: paciente.idPaciente ?? paciente.id ?? 0,
+
     Nombre: paciente.nombre ?? paciente.Nombre ?? '',
     Apellido: paciente.apellido ?? paciente.Apellido ?? '',
+
     FechaNacimiento: paciente.fechaNacimiento
       ? String(paciente.fechaNacimiento).substring(0, 10)
       : '',
+
     Telefono: paciente.telefono ?? '',
     Genero: paciente.genero ?? '',
     EstadoCivil: paciente.estadoCivil ?? '',
     Direccion: paciente.direccion ?? '',
-    AntecedentesPersona: paciente.antecedentesPersona || '',
-    AntecedentesFamilia: paciente.antecedentesFamilia || '',
-    AntecedentesQuirurgico: paciente.antecedentesQuirurgico || '',
+
+    AntecedentesPersona:
+      paciente.antecedentesPersona || '',
+
+    AntecedentesFamilia:
+      paciente.antecedentesFamilia || '',
+
+    AntecedentesQuirurgico:
+      paciente.antecedentesQuirurgico || '',
 
     Gestaciones: paciente.gestaciones ?? '',
     Partos: paciente.partos ?? '',
@@ -1975,48 +2089,136 @@ const editarCita = (paciente: any) => {
     HijosVivos: paciente.hijosVivos ?? '',
     HijosMuertos: paciente.hijosMuertos ?? '',
 
-    DescripcionHabitos: paciente.descripcionHabitos ?? '',
-    EstadoInmunizacion: paciente.estadoInmunizacion ?? '',
-    NivelActividadFisica: paciente.nivelActividadFisica ?? '',
+    DescripcionHabitos:
+      paciente.descripcionHabitos ?? '',
 
-    EstadoAlergia: paciente.estadoAlergia ?? '',
-    Alergia: paciente.alergia ?? '',
+    EstadoInmunizacion:
+      paciente.estadoInmunizacion ?? '',
 
-    Medicacion: paciente.medicacion ?? '',
+    NivelActividadFisica:
+      paciente.nivelActividadFisica ?? '',
 
-    HistoriaEnfermedad: paciente.historiaEnfermedad ?? paciente.HistoriaEnfermedad ?? '',
+    EstadoAlergia:
+      paciente.estadoAlergia ?? '',
 
-    PresionArterial: paciente.presionArterial ?? paciente.PresionArterial ?? '', 
-    FrecuenciaCardiaca: paciente.frecuenciaCardiaca ?? paciente.FrecuenciaCardiaca ?? '', 
-    FrecuenciaRespiratoria: paciente.frecuenciaRespiratoria ?? paciente.FrecuenciaRespiratoria ?? '', 
-    SaturacionOxigeno: paciente.saturacionOxigeno ?? paciente.SaturacionOxigeno ?? '', 
-    PesoExamenFisico: paciente.pesoExamenFisico ?? paciente.PesoExamenFisico ?? '', 
-    Temperatura: paciente.temperatura ?? paciente.Temperatura ?? '',
-    Peso: paciente.peso ?? paciente.Peso ?? '',
-    Estatura: paciente.estatura ?? paciente.Estatura ?? '',
-    IndiceMasaCorporal: paciente.indiceMasaCorporal ?? paciente.IndiceMasaCorporal ?? '',
+    Alergia:
+      paciente.alergia ?? '',
 
-    RevisionAparatosSistemas: paciente.revisionAparatosSistemas ?? paciente.RevisionAparatosSistemas ?? '',
+    Medicacion:
+      paciente.medicacion ?? '',
 
-    ResultadosLaboratorio: paciente.resultadosLaboratorio ?? paciente.ResultadosLaboratorio ?? '',
+    HistoriaEnfermedad:
+      paciente.historiaEnfermedad ??
+      paciente.HistoriaEnfermedad ??
+      '',
 
-    InterpretacionElectrocardiograma: paciente.interpretacionElectrocardiograma ?? paciente.InterpretacionElectrocardiograma ?? '',
+    PresionArterial:
+      paciente.presionArterial ??
+      paciente.PresionArterial ??
+      '',
 
-    EstudiosImagen: paciente.estudiosImagen ?? paciente.EstudiosImagen ?? '',
+    FrecuenciaCardiaca:
+      paciente.frecuenciaCardiaca ??
+      paciente.FrecuenciaCardiaca ??
+      '',
 
-    ResultadoEvaluacion: paciente.resultadoEvaluacion ?? paciente.ResultadoEvaluacion ?? '',
+    FrecuenciaRespiratoria:
+      paciente.frecuenciaRespiratoria ??
+      paciente.FrecuenciaRespiratoria ??
+      '',
 
-    Diagnostica: paciente.diagnostica ?? paciente.Diagnostica ?? '',
+    SaturacionOxigeno:
+      paciente.saturacionOxigeno ??
+      paciente.SaturacionOxigeno ??
+      '',
 
-    TratamientoIndicado: paciente.tratamientoIndicado ?? paciente.TratamientoIndicado ?? ''
+    PesoExamenFisico:
+      paciente.pesoExamenFisico ??
+      paciente.PesoExamenFisico ??
+      '',
 
+    Temperatura:
+      paciente.temperatura ??
+      paciente.Temperatura ??
+      '',
+
+    Peso:
+      paciente.peso ??
+      paciente.Peso ??
+      '',
+
+    Estatura:
+      paciente.estatura ??
+      paciente.Estatura ??
+      '',
+
+    IndiceMasaCorporal:
+      paciente.indiceMasaCorporal ??
+      paciente.IndiceMasaCorporal ??
+      '',
+
+    RevisionAparatosSistemas:
+      paciente.revisionAparatosSistemas ??
+      paciente.RevisionAparatosSistemas ??
+      '',
+
+    ResultadosLaboratorio:
+      paciente.resultadosLaboratorio ??
+      paciente.ResultadosLaboratorio ??
+      '',
+
+    InterpretacionElectrocardiograma:
+      paciente.interpretacionElectrocardiograma ??
+      paciente.InterpretacionElectrocardiograma ??
+      '',
+
+    EstudiosImagen:
+      paciente.estudiosImagen ??
+      paciente.EstudiosImagen ??
+      '',
+
+    ResultadoEvaluacion:
+      paciente.resultadoEvaluacion ??
+      paciente.ResultadoEvaluacion ??
+      '',
+
+    Diagnostica:
+      paciente.diagnostica ??
+      paciente.Diagnostica ??
+      '',
+
+    TratamientoIndicado:
+      paciente.tratamientoIndicado ??
+      paciente.TratamientoIndicado ??
+      ''
   }
 
-  console.log('Datos cargados para modificar:', formData.value)
+  console.log(
+    'Datos cargados para modificar:',
+    formData.value
+  )
 
+  // =========================================================
+  // ACTIVAR MODO EDICIÓN
+  // =========================================================
   pestañaActiva.value = 'paciente'
   modoEdicion.value = true
   modoEdicionbtnNuevo.value = false
+
+  // =========================================================
+  // CARGAR DOCUMENTOS DEL PACIENTE
+  // =========================================================
+  console.log(
+    'Cargando documentos del paciente:',
+    formData.value.Id
+  )
+
+  await cargarDocumentosPaciente()
+
+  console.log(
+    'Documentos cargados:',
+    documentosPaciente.value
+  )
 }
 
 
@@ -2055,6 +2257,48 @@ const eliminarCita = (id: number) => {
 onMounted(() => {
   cargarPacientes()
 })
+
+
+////////////////////////////
+//cargar los documentos
+////////////////////////////
+const documentosPaciente = ref([])
+const cargandoDocumentos = ref(false)
+
+const cargarDocumentosPaciente = async () => {
+
+  if (!formData.value.Id) {
+    documentosPaciente.value = []
+    return
+  }
+
+  try {
+
+    cargandoDocumentos.value = true
+
+    const response = await axios.get(
+      `${API_URL}/Pacientes/ListaDocumentos/${formData.value.Id}`
+    )
+
+    documentosPaciente.value =
+      response.data.documentos || []
+
+  } catch (error) {
+
+    console.error(
+      'Error al cargar documentos:',
+      error
+    )
+
+    documentosPaciente.value = []
+
+  } finally {
+
+    cargandoDocumentos.value = false
+
+  }
+}
+
 
 
 </script>
@@ -3903,7 +4147,7 @@ onMounted(() => {
               v-if="pestañaActiva === 'imagenes'"
               class="p-6.5 space-y-6"
             >
-
+         
               <!-- ENCABEZADO -->
               <div class="border-b pb-3">
                 <h2 class="text-xl font-semibold text-gray-800 dark:text-white">
@@ -3915,6 +4159,14 @@ onMounted(() => {
                   correspondientes.
                 </p>
               </div>
+
+                 <!-- VER DOCUMENTOS EXISTENTES -->
+                  <DocumentosPaciente
+                    v-if="modoEdicion && formData.Id > 0"
+                    :id-paciente="formData.Id"
+                    :clinica="clinica"
+                    :mostrar-alerta="mostrarAlerta"
+                  />
 
 
               <!-- ==================== DESCRIPCIÓN ==================== -->
@@ -4076,13 +4328,13 @@ onMounted(() => {
                <div class="flex justify-start">
 
                 <!-- Guardar descripción -->
-                <button
+                 <!--  <button
                   type="button"
                   @click="enviarFormulario"
                   class="rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
                 >
                   Guardar Imágenes
-                </button>
+                </button>  -->
 
 
                 <!-- Subir archivos -->

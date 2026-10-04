@@ -188,7 +188,7 @@ const allMenuGroups = [
         children: [
           { label: 'Pacientes', route: '/Pacientes' },
           { label: 'Citas', route: '/Citas' },
-          { label: 'Facturación', route: '/Facturas' }
+         //  { label: 'Facturación', route: '/Facturas' }
         ]
       }
     ]

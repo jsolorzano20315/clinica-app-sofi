@@ -74,8 +74,8 @@ interface FormData {
 const mensaje = ref('')
 const tipoMensaje = ref<'success' | 'error' | 'warning'>('success')
 const mostrarMensaje = ref(false)
-const mostrarConfirmarEdicion = ref(false)
-const citaAEditar = ref<any>(null)
+//const mostrarConfirmarEdicion = ref(false)
+//const citaAEditar = ref<any>(null)
 
 
 const configTipo = computed(() => {
@@ -173,21 +173,13 @@ const mostrarAlerta = (texto: string, tipo: 'success' | 'error' | 'warning' = 's
 const fechaMinima = ref('')
 
 const actualizarFechaMinima = () => {
-
   const ahora = new Date()
-
-  // 🔥 agregar 5 minutos
-  ahora.setMinutes(ahora.getMinutes() + 5)
 
   const year = ahora.getFullYear()
   const month = String(ahora.getMonth() + 1).padStart(2, '0')
   const day = String(ahora.getDate()).padStart(2, '0')
 
-  const hours = String(ahora.getHours()).padStart(2, '0')
-  const minutes = String(ahora.getMinutes()).padStart(2, '0')
-
-  fechaMinima.value =
-    `${year}-${month}-${day}T${hours}:${minutes}`
+  fechaMinima.value = `${year}-${month}-${day}`
 }
 
 /* =========================================================
@@ -333,11 +325,11 @@ const formatearFecha = (fecha: string) => {
   return `${dia}/${mes}/${anio}`
 }
 
-const formatearHora = (hora: string) => {
+/*const formatearHora = (hora: string) => {
   if (!hora) return ''
 
   return hora.substring(0, 5) // 16:32
-}
+}*/
 
 /* =========================================================
    🧩 FUNCIONES PRINCIPALES
@@ -367,20 +359,22 @@ const enviarFormulario = async () => {
     // ⚠️ NO usar new Date() aquí porque cambia la hora (UTC)
     const [fecha, hora] = formData.value.fecha.split('T')
 
-    const payload = {
-      id: formData.value.id,
-      pacienteId: Number(formData.value.pacienteId),
-      doctorId: Number(selectedDoctorId.value),
+        const payload = {
+        id: formData.value.id,
+        pacienteId: Number(formData.value.pacienteId),
+        doctorId: Number(formData.value.doctorId),
 
-      fecha: fecha,
-      hora: hora.substring(0, 5),
+        fecha: formData.value.fecha,
 
-      motivo: formData.value.motivo,
-      tipo: formData.value.tipo,
-      telefono: formData.value.telefono,
-      estado: formData.value.estado,
-      clinica: clinica
-    }
+        // La hora ya no se solicita al usuario
+        hora: '',
+
+        motivo: formData.value.motivo,
+        tipo: formData.value.tipo,
+        telefono: formData.value.telefono,
+        estado: formData.value.estado,
+        clinica: clinica
+      }
 
     // 🔥 AQUÍ está la clave: decidir si es crear o editar
     if (modoEdicion.value && formData.value.id > 0) {
@@ -407,7 +401,7 @@ const confirmarEdicion = () => {
   formData.value = {
     id: cita.id,
     pacienteId: cita.pacienteId,
-    fecha: cita.fecha?.slice(0, 16),
+    fecha: cita.fecha?.slice(0, 10),
     hora: cita.hora,
     motivo: cita.motivo,
     tipo: cita.tipo,
@@ -430,31 +424,46 @@ const cancelarEdicion = () => {
   mostrarConfirmarEdicion.value = false
 }
 
-//Editar
+// =========================================================
+// ✏️ EDITAR CITA
+// =========================================================
 const editarCita = (cita: any) => {
+
+  console.log("Cita seleccionada para editar:", cita)
+
+  // Cargar datos de la cita en el formulario
   formData.value = {
-    id: cita.id,
-    pacienteId: cita.pacienteId, // 👈 aquí va el dato correcto
-    fecha: cita.fecha,
-    hora: cita.hora,
-    motivo: cita.motivo,
-    tipo: cita.tipo,
-    telefono: cita.telefono,
-    estado: cita.estado,
-    doctorId: cita.doctorId,
+    id: Number(cita.id),
+    pacienteId: Number(cita.pacienteId),
+    doctorId: Number(cita.doctorId),
+    fecha: cita.fecha ? cita.fecha.substring(0, 10) : '',
+    hora: cita.hora ?? '',
+    tipo: cita.tipo ?? '',
+    telefono: cita.telefono ?? '',
+    motivo: cita.motivo ?? '',
+    estado: cita.estado ?? '',
     nombreCompleto: cita.nombreCompleto ?? '',
     nombreDoctor: cita.nombreDoctor ?? '',
     clinica: clinica
   }
 
-  // 🔥 ACTIVAR MODO EDICIÓN
+  // Mantener paciente seleccionado
+  selectedPaciente.value = Number(cita.pacienteId)
+
+  // Mantener doctor seleccionado
+  selectedDoctorId.value = Number(cita.doctorId)
+
+  // Activar modo edición
   modoEdicion.value = true
 
-  // 🔥 CAMBIAR VISTA SI ES NECESARIO
+  // Mostrar formulario
   view.value = 'citas'
 
-  // (opcional UX)
- // mostrarAlerta("Editando cita", "warning")
+  // Llevar al inicio de la pantalla
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  })
 }
 
 //Eliminar
@@ -613,7 +622,7 @@ onMounted(async () => {
 <!-- ===================== -->
 <!-- MODAL MECONFIRMAR Editar -->
 <!-- ===================== -->
-<div v-if="mostrarConfirmarEdicion" class="fixed inset-0 z-[10000] flex items-center justify-center">
+<!--<div v-if="mostrarConfirmarEdicion" class="fixed inset-0 z-[10000] flex items-center justify-center">
 
   <div class="absolute inset-0 bg-black/50"></div>
 
@@ -637,7 +646,7 @@ onMounted(async () => {
     </div>
 
   </div>
-</div>
+</div>-->
 
 
     <div class="flex justify-center">
@@ -723,20 +732,20 @@ onMounted(async () => {
                   />
                 </div>
 
-                  <!-- Fecha -->
-              <div class="w-full xl:w-1/2">
-                <label class="block mb-2.5">
-                  Fecha y Hora
-                </label>
+                 <!-- Fecha -->
+                  <div class="w-full xl:w-1/2">
+                    <label class="block mb-2.5">
+                      Fecha
+                    </label>
 
-                <input
-                  type="datetime-local"
-                  v-model="formData.fecha"
-                  :min="fechaMinima"
-                  class="w-full border py-3 px-5 rounded"
-                  :required="!modoEdicion"
-                />
-              </div>
+                    <input
+                      type="date"
+                      v-model="formData.fecha"
+                      :min="fechaMinima"
+                      class="w-full border py-3 px-5 rounded"
+                      required
+                    />
+                  </div>
 
               </div>
 
@@ -830,9 +839,9 @@ onMounted(async () => {
 
                     <tr>
 
-                      <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">
-                        Fecha y hora
-                      </th>
+                     <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">
+                      Fecha
+                    </th>
 
                       <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">
                         Paciente
@@ -853,6 +862,10 @@ onMounted(async () => {
                       <th class="px-6 py-4 text-center text-xs font-semibold uppercase tracking-wider">
                         Estado
                       </th>
+
+                      <th class="px-6 py-4 text-center text-xs font-semibold uppercase tracking-wider">
+                        Acciones
+                      </th>
                     </tr>
 
                   </thead>
@@ -872,7 +885,7 @@ onMounted(async () => {
                         <div class="flex flex-col">
 
                           <span class="text-sm font-semibold text-gray-800">
-                            {{ formatearFecha(cita.fecha) }} : 🕒 {{ formatearHora(cita.hora) }}
+                           {{ formatearFecha(cita.fecha) }}
                           </span>
                         </div>
                       </td>
@@ -940,6 +953,33 @@ onMounted(async () => {
                         </span>
 
                       </td>
+
+                      <!-- ACCIONES -->
+                        <td class="px-6 py-4 text-center">
+                          <div class="flex justify-center gap-2">
+
+                            <!-- EDITAR -->
+                            <button
+                              type="button"
+                              @click="editarCita(cita)"
+                              class="inline-flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-700 transition"
+                              title="Editar cita"
+                            >
+                              ✏️ Editar
+                            </button>
+
+                            <!-- ELIMINAR -->
+                            <button
+                              type="button"
+                              @click="eliminarCita(cita.id)"
+                              class="inline-flex items-center gap-1 rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white hover:bg-red-700 transition"
+                              title="Eliminar cita"
+                            >
+                              🗑️ Eliminar
+                            </button>
+
+                          </div>
+                        </td>
 
                     </tr>
 
