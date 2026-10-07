@@ -8,6 +8,15 @@ const sidebarStore = useSidebarStore()
 const nombre = localStorage.getItem("nombre") || ''
 const clinica = localStorage.getItem("clinica") || ''
 
+const cerrarSesion = () => {
+  console.log('🚪 CERRANDO SESIÓN...')
+
+  // Eliminar todo lo guardado en la sesión
+  localStorage.clear()
+  sessionStorage.clear()
+
+  console.log('🧹 localStorage y sessionStorage eliminados')
+}
 </script>
 
 <template>
@@ -90,7 +99,8 @@ const clinica = localStorage.getItem("clinica") || ''
         <!-- User Area - -->   
          <!--<DropdownUser /> -->
          <router-link
-          to="/"
+            to="/"
+            @click="cerrarSesion"
             class="flex items-center gap-3.5 py-4 px-6 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
           >
         <svg
