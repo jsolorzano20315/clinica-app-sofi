@@ -2,7 +2,7 @@
 import BreadcrumbDefault from '@/components/Breadcrumbs/BreadcrumbDefault.vue'
 import DefaultCard from '@/components/Forms/DefaultCard.vue'
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import axios from 'axios'
 import DocumentosPaciente from '@/views/DocumentosPaciente.vue'
 
@@ -363,6 +363,11 @@ const nuevoPaciente = () => {
   // Salir del modo edición
   modoEdicionbtnNuevo.value = true
 
+  // =========================================================
+  // ELIMINAR BORRADOR DEL PACIENTE ANTERIOR
+  // =========================================================
+  eliminarBorrador()
+
   // Limpiar formulario
   formData.value = {
     Nombre: '',
@@ -410,7 +415,8 @@ const nuevoPaciente = () => {
     Diagnostica: '',
     TratamientoIndicado: ''
   }
-   modoEdicion.value = false
+
+  modoEdicion.value = false
 }
 
 
@@ -641,6 +647,165 @@ const formData = ref({
   TratamientoIndicado: ''
 
 })
+
+/* =========================================================
+   💾 BORRADOR AUTOMÁTICO DEL FORMULARIO
+   Mantiene los datos aunque el usuario cambie de pestaña
+   o salga y vuelva a entrar al formulario.
+========================================================= */
+
+/* =========================================================
+   💾 BORRADOR AUTOMÁTICO DEL FORMULARIO
+========================================================= */
+
+// Clave única para el formulario de pacientes
+const claveBorrador = `paciente_borrador_${clinica}_${email}`
+
+
+// =========================================================
+// GUARDAR BORRADOR
+// =========================================================
+const guardarBorrador = () => {
+
+  try {
+
+    const datos = JSON.stringify(formData.value)
+
+    localStorage.setItem(
+      claveBorrador,
+      datos
+    )
+
+    console.log(
+      '💾 BORRADOR GUARDADO:',
+      formData.value
+    )
+
+  } catch (error) {
+
+    console.error(
+      '❌ Error al guardar borrador:',
+      error
+    )
+
+  }
+
+}
+
+
+// =========================================================
+// RECUPERAR BORRADOR
+// =========================================================
+const recuperarBorrador = async () => {
+
+  try {
+
+    const borrador = localStorage.getItem(
+      claveBorrador
+    )
+
+    console.log(
+      '🔎 BUSCANDO BORRADOR:',
+      claveBorrador
+    )
+
+    console.log(
+      '📦 BORRADOR EN LOCALSTORAGE:',
+      borrador
+    )
+
+    if (!borrador) {
+
+      console.log(
+        'ℹ️ No existe borrador.'
+      )
+
+      return false
+    }
+
+
+    const datosGuardados =
+      JSON.parse(borrador)
+
+
+    if (
+      !datosGuardados ||
+      typeof datosGuardados !== 'object'
+    ) {
+
+      console.log(
+        '⚠️ El borrador no contiene datos válidos.'
+      )
+
+      return false
+    }
+
+
+    console.log(
+      '📋 DATOS RECUPERADOS:',
+      datosGuardados
+    )
+
+
+    // Esperar a que Vue termine de montar
+    // todos los controles del formulario.
+    await nextTick()
+
+
+    // Mantener la estructura original
+    // y reemplazar únicamente los datos guardados.
+    formData.value = {
+      ...formData.value,
+      ...datosGuardados
+    }
+
+
+    console.log(
+      '✅ FORMDATA DESPUÉS DE RECUPERAR:',
+      formData.value
+    )
+
+
+    return true
+
+  } catch (error) {
+
+    console.error(
+      '❌ Error al recuperar borrador:',
+      error
+    )
+
+    return false
+  }
+
+}
+
+
+// =========================================================
+// ELIMINAR BORRADOR
+// =========================================================
+const eliminarBorrador = () => {
+
+  try {
+
+    localStorage.removeItem(
+      claveBorrador
+    )
+
+    console.log(
+      '🗑️ BORRADOR ELIMINADO:',
+      claveBorrador
+    )
+
+  } catch (error) {
+
+    console.error(
+      '❌ Error al eliminar borrador:',
+      error
+    )
+
+  }
+}
 
 
 
@@ -1048,65 +1213,6 @@ const totalPages = computed(() =>
 const view = ref('formulario')
 
 
-// Reset formulario
-formData.value = {
-  Id: 0,
-  Nombre: '',
-  Apellido: '',
-  FechaNacimiento: '',
-  Telefono: '',
-  Genero: '',
-  EstadoCivil: '',
-  Direccion: '',
-
-  AntecedentesPersona: '',
-  AntecedentesFamilia: '',
-  AntecedentesQuirurgico: '',
-
-  Gestaciones: '',
-  Partos: '',
-  Cesareas: '',
-  Abortos: '',
-  HijosVivos: '',
-  HijosMuertos: '',
-
-  DescripcionHabitos: '',
-  EstadoInmunizacion: '',
-  NivelActividadFisica: '',
-
-  EstadoAlergia: '',
-  Alergia: '',
-
-  Medicacion: '',
-
-  HistoriaEnfermedad: '',
-
-  PresionArterial: '',
-  FrecuenciaCardiaca: '',
-  FrecuenciaRespiratoria: '',
-  SaturacionOxigeno: '',
-  PesoExamenFisico: '',
-  Temperatura: '',
-
-  Peso: '',
-  Estatura: '',
-  IndiceMasaCorporal: '',
-
-  RevisionAparatosSistemas: '',
-
-  ResultadosLaboratorio: '',
-
-  InterpretacionElectrocardiograma: '',
-
-  EstudiosImagen: '',
-
-  ResultadoEvaluacion: '',
-
-  Diagnostica: '',
-
-  TratamientoIndicado: ''
-}
-
 pestañaActiva.value = 'paciente'
 
 
@@ -1137,6 +1243,11 @@ const telefonoFormateado = computed({
 // 🧹 RESTABLECER FORMULARIO
 // =========================================================
 const resetForm = () => {
+   // =========================================================
+   // ELIMINAR BORRADOR PORQUE EL EXPEDIENTE YA FUE GUARDADO
+   // =========================================================
+  eliminarBorrador()
+
   formData.value = {
     Id: 0,
     IdPaciente: 0,
@@ -2254,10 +2365,30 @@ const eliminarCita = (id: number) => {
 }
 
 // ✅ MOUNT
-onMounted(() => {
-  cargarPacientes()
-})
+onMounted(async () => {
+  console.log('🚀 PACIENTES.VUE INICIANDO')
 
+  await cargarPacientes()
+
+  // Primero recuperar el borrador
+  const recuperado = await recuperarBorrador()
+
+  if (recuperado) {
+    mostrarAlerta(
+      'Se recuperaron los datos que estaba ingresando anteriormente.'
+    )
+  }
+
+  // IMPORTANTE:
+  // El watch comienza DESPUÉS de recuperar el borrador
+  watch(
+    formData,
+    () => {
+      guardarBorrador()
+    },
+    { deep: true }
+  )
+})
 
 ////////////////////////////
 //cargar los documentos
@@ -4560,252 +4691,272 @@ const cargarDocumentosPaciente = async () => {
           
           
         </form>
+        <!-- =============================== --> 
+        <!-- CIERRE FORMULARIO DEL PACIENTE -->
+         <!-- =============================== -->
+      </DefaultCard>
  
-       <!-- ===================== -->
-        <!-- TABLA PACIENTES -->
+      <!-- ===================== -->
+      <!-- TABLA PACIENTES -->
+      <!-- ===================== -->
+      <DefaultCard
+        cardTitle="Listado de Identificación de Pacientes"
+        class="border-0 shadow-none"
+      >
+
         <!-- ===================== -->
-       <DefaultCard cardTitle="Listado de Identificación de Pacientes" class="border-0 shadow-none">
+        <!-- CONTENEDOR RESPONSIVO -->
+        <!-- ===================== -->
+        <div class="w-full overflow-x-auto">
 
-       
-              <table class="min-w-full divide-y divide-gray-200">
+          <table class="min-w-[900px] w-full divide-y divide-gray-200">
 
-              <!-- HEADER -->
-               <thead class="bg-gradient-to-r from-indigo-600 to-blue-600 text-white">
-             
-                  <tr>
+            <!-- HEADER -->
+            <thead class="bg-gradient-to-r from-indigo-600 to-blue-600 text-white">
 
-                  <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">
-                    Paciente
-                  </th>
+              <tr>
 
-                  <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">
-                    Fecha nacimiento
-                  </th>
-             
-                  <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">
-                    Teléfono
-                  </th>
+                <th class="px-3 sm:px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">
+                  Paciente
+                </th>
 
-                  <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">
-                    Genero
-                  </th>
+                <th class="px-3 sm:px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">
+                  Fecha nacimiento
+                </th>
 
-                   <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">
-                    Estado Civil
-                  </th>
+                <th class="px-3 sm:px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">
+                  Teléfono
+                </th>
 
-                  <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">
-                    Acciones
-                  </th>
-                  
-                </tr>
+                <th class="px-3 sm:px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">
+                  Genero
+                </th>
 
-              </thead>
+                <th class="px-3 sm:px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">
+                  Estado Civil
+                </th>
 
-              <!-- BODY -->
-              <tbody class="divide-y divide-gray-100 bg-white">
+                <th class="px-3 sm:px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">
+                  Acciones
+                </th>
 
-                <tr
-                  v-for="paciente in paginated"
-                  :key="paciente.id"
-                  class="hover:bg-blue-50/40 transition duration-200 even:bg-gray-50/40"
-                >
+              </tr>
 
-                  <!-- FECHA INGRESO 
-                  <td class="px-6 py-4 whitespace-nowrap">
+            </thead>
 
-                    <div class="flex flex-col">
-                      <span class="font-medium text-gray-800">
-                        {{ formatearFecha(paciente.fecha) }}
-                      </span>
+            <!-- BODY -->
+            <tbody class="divide-y divide-gray-100 bg-white">
 
-                      <span class="text-xs text-gray-400">
-                        Registro
-                      </span>
-                    </div>
+              <tr
+                v-for="paciente in paginated"
+                :key="paciente.id"
+                class="hover:bg-blue-50/40 transition duration-200 even:bg-gray-50/40"
+              >
 
-                  </td> -->
+                <!-- FECHA INGRESO
+                <td class="px-3 sm:px-4 py-3 whitespace-nowrap">
 
-                  <!-- NOMBRE -->
-                  <td class="px-6 py-4">
+                  <div class="flex flex-col">
 
-                    <div class="flex items-center gap-3">
-
-                      <!-- Avatar -->
-                      <div
-                        class="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold"
-                      >
-                        {{ paciente.nombreCompleto?.charAt(0) }}
-                      </div>
-
-                      <div class="min-w-0">
-
-                        <p class="font-semibold text-gray-800 truncate">
-                          {{ paciente.nombreCompleto }}
-                        </p>
-
-                        <p class="text-xs text-gray-400">
-                          Paciente registrado
-                        </p>
-
-                      </div>
-
-                    </div>
-
-                  </td>
-
-                  <!-- NACIMIENTO -->
-                  <td class="px-6 py-4 whitespace-nowrap">
-
-                    <div class="flex flex-col">
-
-                      <span class="text-gray-700">
-                        {{ formatearFecha(paciente.fechaNacimiento) }}
-                      </span>
-
-                      <span class="text-xs text-gray-400">
-                        Fecha nacimiento
-                      </span>
-
-                    </div>
-
-                  </td>
-
-                    <!-- TELÉFONO -->
-                  <td class="px-6 py-4">
-
-                    <span
-                      class="inline-flex items-center gap-1 bg-green-50 text-green-700 px-3 py-1 rounded-full text-xs font-medium border border-green-100"
-                    >
-                      📞 {{ paciente.telefono }}
+                    <span class="font-medium text-gray-800">
+                      {{ formatearFecha(paciente.fecha) }}
                     </span>
 
-                  </td>
-
-                  <!-- GENERO -->
-                  <td class="px-6 py-4">
-
-                    <span
-                      class="inline-flex items-center gap-1 bg-green-50 text-green-700 px-3 py-1 rounded-full text-xs font-medium border border-green-100"
-                    >
-                    <span class="text-2xl">⚥</span>  {{ paciente.genero }}
+                    <span class="text-xs text-gray-400">
+                      Registro
                     </span>
 
-                  </td>
+                  </div>
 
-                    <!-- ESTADO_CIVIL -->
-                  <td class="px-6 py-4">
+                </td>
+                -->
 
-                    <span
-                      class="inline-flex items-center gap-1 bg-green-50 text-green-700 px-3 py-1 rounded-full text-xs font-medium border border-green-100"
-                    >
-                    {{ paciente.estadoCivil }}
-                    </span>
+                <!-- NOMBRE -->
+                <td class="px-3 sm:px-4 py-3">
 
-                  </td>
+                  <div class="flex items-center gap-3">
 
-                  <!-- DIRECCIÓN 
-                  <td class="px-6 py-4 max-w-[220px]">
-
+                    <!-- Avatar -->
                     <div
-                      class="truncate text-gray-600"
-                      :title="paciente.direccion"
+                      class="w-10 h-10 flex-shrink-0 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold"
                     >
-                      {{ paciente.direccion }}
+                      {{ paciente.nombreCompleto?.charAt(0) }}
                     </div>
 
-                  </td> -->
+                    <div class="min-w-0">
 
-                  <!-- ACCIONES -->
-                  <td class="px-6 py-4">
+                      <p class="font-semibold text-gray-800 truncate">
+                        {{ paciente.nombreCompleto }}
+                      </p>
 
-                    <div class="flex items-center justify-center gap-2">
+                      <p class="text-xs text-gray-400">
+                        Paciente registrado
+                      </p>
 
-                  
+                    </div>
+
+                  </div>
+
+                </td>
+
+                <!-- NACIMIENTO -->
+                <td class="px-3 sm:px-4 py-3 whitespace-nowrap">
+
+                  <div class="flex flex-col">
+
+                    <span class="text-gray-700">
+                      {{ formatearFecha(paciente.fechaNacimiento) }}
+                    </span>
+
+                    <span class="text-xs text-gray-400">
+                      Fecha nacimiento
+                    </span>
+
+                  </div>
+
+                </td>
+
+                <!-- TELÉFONO -->
+                <td class="px-3 sm:px-4 py-3 whitespace-nowrap">
+
+                  <span
+                    class="inline-flex items-center gap-1 bg-green-50 text-green-700 px-3 py-1 rounded-full text-xs font-medium border border-green-100"
+                  >
+                    📞 {{ paciente.telefono }}
+                  </span>
+
+                </td>
+
+                <!-- GENERO -->
+                <td class="px-3 sm:px-4 py-3 whitespace-nowrap">
+
+                  <span
+                    class="inline-flex items-center gap-1 bg-green-50 text-green-700 px-3 py-1 rounded-full text-xs font-medium border border-green-100"
+                  >
+                    <span class="text-2xl">⚥</span>
+                    {{ paciente.genero }}
+                  </span>
+
+                </td>
+
+                <!-- ESTADO_CIVIL -->
+                <td class="px-3 sm:px-4 py-3 whitespace-nowrap">
+
+                  <span
+                    class="inline-flex items-center gap-1 bg-green-50 text-green-700 px-3 py-1 rounded-full text-xs font-medium border border-green-100"
+                  >
+                    {{ paciente.estadoCivil }}
+                  </span>
+
+                </td>
+
+                <!-- DIRECCIÓN
+                <td class="px-3 sm:px-4 py-3 max-w-[220px]">
+
+                  <div
+                    class="truncate text-gray-600"
+                    :title="paciente.direccion"
+                  >
+                    {{ paciente.direccion }}
+                  </div>
+
+                </td>
+                -->
+
+                <!-- ACCIONES -->
+                <td class="px-3 sm:px-4 py-3">
+
+                  <div
+                    class="flex items-center justify-center gap-2 whitespace-nowrap"
+                  >
+
                     <!-- EDITAR -->
                     <button
                       type="button"
                       @click="editarCita(paciente)"
-                      class="inline-flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-xs font-medium shadow-sm transition"
+                      class="inline-flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-xs font-medium shadow-sm transition whitespace-nowrap"
                     >
                       ✏️ Editar
                     </button>
-                   
 
-                      <!-- ELIMINAR -->
-                     <!--  <button
-                        @click="eliminarCita(paciente.id)"
-                        class="inline-flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-xs font-medium shadow-sm transition"
-                      >
-                        🗑 Eliminar
-                      </button>  -->
+                    <!-- ELIMINAR
+                    <button
+                      @click="eliminarCita(paciente.id)"
+                      class="inline-flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-xs font-medium shadow-sm transition"
+                    >
+                      🗑 Eliminar
+                    </button>
+                    -->
 
+                  </div>
+
+                </td>
+
+              </tr>
+
+              <!-- VACÍO -->
+              <tr v-if="paginated.length === 0">
+
+                <td colspan="6" class="py-10 text-center">
+
+                  <div
+                    class="flex flex-col items-center justify-center text-gray-400"
+                  >
+
+                    <div class="text-5xl mb-2">
+                      🩺
                     </div>
 
-                  </td>
+                    <p class="font-medium">
+                      No hay pacientes registrados
+                    </p>
 
-                </tr>
+                    <p class="text-sm text-gray-400">
+                      Los pacientes aparecerán aquí
+                    </p>
 
-                <!-- VACÍO -->
-                <tr v-if="paginated.length === 0">
+                  </div>
 
-                  <td colspan="6" class="py-10 text-center">
+                </td>
 
-                    <div class="flex flex-col items-center justify-center text-gray-400">
+              </tr>
 
-                      <div class="text-5xl mb-2">
-                        🩺
-                      </div>
+            </tbody>
 
-                      <p class="font-medium">
-                        No hay pacientes registrados
-                      </p>
+          </table>
 
-                      <p class="text-sm text-gray-400">
-                        Los pacientes aparecerán aquí
-                      </p>
-
-                    </div>
-
-                  </td>
-
-                </tr>
-
-              </tbody>
-
-            </table>
-        </DefaultCard>
-       
-
-             <!-- ===================== -->
-            <!-- PAGINACIÓN -->
-            <!-- ===================== -->
-            <div class="flex justify-center mt-6 gap-2">
-
-                <button
-                @click="currentPage--"
-                :disabled="currentPage === 1"
-                class="px-3 py-1 bg-gray-300 rounded"
-                >
-                Anterior
-                </button>
-
-                <span>
-                Página {{ currentPage }} de {{ totalPages }}
-                </span>
-
-                <button
-                @click="currentPage++"
-                :disabled="currentPage === totalPages"
-                class="px-3 py-1 bg-gray-300 rounded"
-                >
-                Siguiente
-                </button>
-
-            </div>
-        
+        </div>
 
       </DefaultCard>
+
+
+      <!-- ===================== -->
+      <!-- PAGINACIÓN -->
+      <!-- ===================== -->
+      <div class="flex flex-wrap justify-center items-center mt-6 gap-2">
+
+        <button
+          @click="currentPage--"
+          :disabled="currentPage === 1"
+          class="px-3 py-1 bg-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Anterior
+        </button>
+
+        <span class="whitespace-nowrap">
+          Página {{ currentPage }} de {{ totalPages }}
+        </span>
+
+        <button
+          @click="currentPage++"
+          :disabled="currentPage === totalPages"
+          class="px-3 py-1 bg-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Siguiente
+        </button>
+
+      </div>
+
 
       </div>
     </div>

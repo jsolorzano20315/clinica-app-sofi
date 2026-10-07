@@ -243,6 +243,9 @@ const formatearTelefono = (tel: string) => tel.replace(/\D/g, '')
 //}
 
 
+// =====================
+// 📱 ENVIAR WHATSAPP -- PERSONAL . PENDIENTE -  
+// =====================
 const enviarWhatsApp = async (evento: Evento, fecha: string) => {
 
   if (!evento.telefono) {
