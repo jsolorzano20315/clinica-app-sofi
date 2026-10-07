@@ -2373,11 +2373,11 @@ onMounted(async () => {
   // Primero recuperar el borrador
   const recuperado = await recuperarBorrador()
 
-  if (recuperado) {
-    mostrarAlerta(
-      'Se recuperaron los datos que estaba ingresando anteriormente.'
-    )
-  }
+  //if (recuperado) {
+  //  mostrarAlerta(
+   //   'Se recuperaron los datos que estaba ingresando anteriormente.'
+   // )
+ // }
 
   // IMPORTANTE:
   // El watch comienza DESPUÉS de recuperar el borrador
