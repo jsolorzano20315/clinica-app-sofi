@@ -3782,7 +3782,7 @@ const cargarDocumentosPaciente = async () => {
                   id="presionArterial"
                   v-model="formData.PresionArterial"
                   type="text"
-                   maxlength="6"
+                   maxlength="7"
                   class="w-full border py-3 px-5 rounded"
                   placeholder="Ejemplo: 120/80 mmHg"
                 />
